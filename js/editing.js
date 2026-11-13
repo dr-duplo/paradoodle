@@ -316,25 +316,45 @@ function fitName() {
         6,
     ) + 'px';
 }
+function commitBurst(key) {
+  if (burst === key) return;
+  commit();
+  burst = key;
+}
 $('name').oninput = (e) => {
+  commitBurst('name');
   S.name = e.target.value;
   fitName();
   changed();
+};
+$('name').onchange = () => {
+  burst = null;
 };
 addEventListener('resize', fitName);
 try {
   document.fonts.ready.then(fitName);
 } catch {}
 $('tempo').oninput = (e) => {
+  commitBurst('tempo');
   S.tempo = +e.target.value;
   $('bpm').textContent = S.tempo;
-  persist();
+  changed();
+};
+$('tempo').onchange = () => {
+  burst = null;
 };
 function stepHist(from, to) {
   if (!from.length) return;
-  to.push(JSON.stringify(S));
+  burst = null;
+  const names = (st) => st.bars.map((b) => b.name).join('\n'),
+    before = names(S);
+  to.push(snap());
   if (to.length > 80) to.shift();
   S = JSON.parse(from.pop());
+  // solo is a bar index: keep it if the bars are the same, else take the one saved with the step
+  const saved = S._solo ?? null;
+  delete S._solo;
+  if (names(S) !== before) solo = saved;
   if (solo !== null && solo >= S.bars.length) solo = null;
   syncHist();
   persist();
@@ -344,7 +364,12 @@ $('undo').onclick = () => stepHist(hist, fut);
 $('redo').onclick = () => stepHist(fut, hist);
 document.addEventListener('keydown', (e) => {
   if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
-  if (e.target.closest?.('input, textarea, select, [contenteditable]')) return;
+  const t = e.target;
+  if (
+    t.closest?.('textarea, select, [contenteditable]') ||
+    (t.tagName === 'INPUT' && !['range', 'checkbox', 'radio', 'button'].includes(t.type))
+  )
+    return;
   const k = e.key.toLowerCase();
   if (k === 'z' && !e.shiftKey) {
     e.preventDefault();

@@ -85,10 +85,7 @@ $('importFile').onchange = async (e) => {
   const l = lib(),
     names = new Set(l.map((x) => x.state.name || 'Untitled groove'));
   loops.forEach((st) => {
-    const base = st.name || 'Untitled groove';
-    let nm = base,
-      k = 2;
-    while (names.has(nm)) nm = `${base} (${k++})`;
+    const nm = freeName(st.name || 'Untitled groove', names);
     st.name = nm;
     names.add(nm);
     l.unshift({ id: newId(), state: st, at: Date.now() });
@@ -98,8 +95,13 @@ $('importFile').onchange = async (e) => {
     return;
   }
   renderLib();
-  const skipped = all.length - loops.length;
+  const unreadable = raw.length - loops.length,
+    overLimit = all.length - raw.length,
+    skipped = [
+      unreadable && `${unreadable} that couldn't be read`,
+      overLimit && `${overLimit} over the limit of 200 per file`,
+    ].filter(Boolean);
   libStatus(
-    `Imported ${loops.length} groove${loops.length > 1 ? 's' : ''}${skipped ? `, skipped ${skipped} that couldn't be read` : ''}. Tap Open to load one.`,
+    `Imported ${loops.length} groove${loops.length > 1 ? 's' : ''}${skipped.length ? `, skipped ${skipped.join(' and ')}` : ''}. Tap Open to load one.`,
   );
 };

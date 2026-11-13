@@ -74,7 +74,52 @@ async function renderSheet(style) {
     gap = 54;
   const cw = (W - 2 * M - labelW) / n;
   const staffW = (W - 2 * M) / SC;
-  const staffH = showStaff ? staffLayout(staffW).height * SC + 30 : 0;
+  const lay = showStaff ? staffLayout(staffW) : null;
+  // The notation reaches above and below its staves (tuplet numbers, open-hat circles,
+  // stems), so draw each system alone on a scratch canvas and measure where its ink really is.
+  // This sets the space under the header and between systems.
+  const INK_PAD = 24;
+  let ink = [];
+  if (showStaff) {
+    const pad = 200,
+      probe = document.createElement('canvas');
+    probe.width = W;
+    probe.height = STAFF_ROW * SC + 2 * pad;
+    const pc = probe.getContext('2d', { willReadFrequently: true });
+    for (let L = 0; L < lay.lines; L++) {
+      pc.clearRect(0, 0, probe.width, probe.height);
+      pc.save();
+      pc.translate(M, pad);
+      pc.scale(SC, SC);
+      drawStaff(VF, pc, 0, 0, staffW, { ys: new Array(lay.lines).fill(0), only: L });
+      pc.restore();
+      const a = pc.getImageData(0, 0, probe.width, probe.height).data;
+      const rowHas = (r) => {
+        for (let c = 3; c < probe.width * 4; c += 4)
+          if (a[r * probe.width * 4 + c] > 8) return true;
+        return false;
+      };
+      let top = 0,
+        bot = probe.height - 1;
+      while (top < bot && !rowHas(top)) top++;
+      while (bot > top && !rowHas(bot)) bot--;
+      // relative to the stave box's top edge
+      ink.push({ top: top - pad, bot: bot + 1 - pad });
+    }
+  }
+  const sysY = []; // each system's offset below the notation block's top
+  if (showStaff) {
+    sysY[0] = 2 * INK_PAD - ink[0].top;
+    for (let L = 1; L < lay.lines; L++)
+      sysY[L] = Math.max(
+        sysY[L - 1] + STAFF_ROW * SC,
+        sysY[L - 1] + ink[L - 1].bot - ink[L].top + 2 * INK_PAD,
+      );
+  }
+  const last = showStaff ? lay.lines - 1 : 0;
+  const staffH = showStaff
+    ? Math.max(sysY[last] + STAFF_ROW * SC + 28, sysY[last] + ink[last].bot) + 30
+    : 0;
   const ROWS = visibleRows();
   const barBlock = headH + countH + ROWS.length * rowH + gap;
   const gridH = showGrid ? S.bars.length * barBlock + (showStaff ? 50 : 0) : 0;
@@ -85,7 +130,7 @@ async function renderSheet(style) {
   // with a QR code, the header is as tall as the code, which sits on the left of the title
   const qrTop = M - 14,
     ruleY = qr ? Math.max(M + 126, qrTop + qr.size + 18) : M + 126,
-    bodyY = ruleY + 44;
+    bodyY = ruleY + 3;
   const H = bodyY + staffH + gridH + legendH + footH + M * 0.6;
   const cv = document.createElement('canvas');
   cv.width = W;
@@ -140,17 +185,22 @@ async function renderSheet(style) {
   }
   ctx.fillStyle = INK;
   ctx.fillRect(M, ruleY, W - 2 * M, 3);
-  let y = bodyY;
+  // y positions between blocks where the PDF may start a new page
+  const breaks = [];
+  let y = bodyY + (showStaff ? 0 : 41);
   if (showStaff) {
     ctx.save();
     ctx.translate(M, y);
     ctx.scale(SC, SC);
-    drawStaff(VF, ctx, 0, 0, staffW);
+    drawStaff(VF, ctx, 0, 0, staffW, { ys: sysY.map((v) => v / SC) });
     ctx.restore();
+    for (let L = 1; L < lay.lines; L++)
+      breaks.push(y + (sysY[L - 1] + ink[L - 1].bot + sysY[L] + ink[L].top) / 2);
     y += staffH;
   }
   if (showGrid) {
     if (showStaff) {
+      breaks.push(y - 24);
       ctx.fillStyle = LIGHT;
       ctx.fillRect(M, y - 10, W - 2 * M, 1.5);
       sectionLabel('GRID', y + 28);
@@ -158,6 +208,7 @@ async function renderSheet(style) {
     }
     const gx = M + labelW;
     S.bars.forEach((bar, b) => {
+      if (b) breaks.push(y - gap / 2);
       ctx.font = `600 24px ${FD}`;
       ctx.fillStyle = MUTED;
       ctx.textAlign = 'left';
@@ -209,6 +260,7 @@ async function renderSheet(style) {
       y = bottom + gap;
     });
   }
+  breaks.push(y - 24);
   ctx.fillStyle = INK;
   ctx.fillRect(M, y - 10, W - 2 * M, 1.5);
   if (showStaff) {
@@ -219,6 +271,7 @@ async function renderSheet(style) {
     drawStaffKey(VF, ctx, 0, 0, staffW);
     ctx.restore();
     y += 300;
+    if (showGrid) breaks.push(y - 4);
   }
   if (showGrid) {
     sectionLabel(showStaff ? 'GRID KEY' : 'KEY', y + 30);
@@ -258,6 +311,7 @@ async function renderSheet(style) {
   ctx.font = `500 19px ${FM}`;
   ctx.fillText('dr-duplo.github.io/paradoodle', W - M, fy);
   cv.note = note;
+  cv.breaks = breaks;
   return cv;
 }
 const slug = () =>
@@ -306,22 +360,28 @@ document.addEventListener('keydown', (e) => {
 });
 let sheetStyle = store.get('groove.sheetStyle') || 'both';
 $('sheetStyle').value = sheetStyle;
+let previewGen = 0;
 async function refreshPreview() {
-  $('saveStatus').textContent = sheetStyle === 'grid' ? '' : 'Rendering notation…';
+  const gen = ++previewGen, // only the latest requested render may set the sheet
+    style = sheetStyle;
+  $('saveStatus').textContent = style === 'grid' ? '' : 'Rendering notation…';
   $('savePng').disabled = $('savePdf').disabled = true;
+  let canvas;
   try {
-    sheetCanvas = await renderSheet(sheetStyle);
+    canvas = await renderSheet(style);
   } catch (err) {
     console.error(err);
     try {
-      sheetCanvas = await renderSheet('grid');
-      sheetCanvas.note =
+      canvas = await renderSheet('grid');
+      canvas.note =
         'This pattern could not be drawn as notation, so the sheet shows the grid only.';
     } catch {
-      $('saveStatus').textContent = "The sheet couldn't be drawn.";
+      if (gen === previewGen) $('saveStatus').textContent = "The sheet couldn't be drawn.";
       return;
     }
   }
+  if (gen !== previewGen) return;
+  sheetCanvas = canvas;
   $('previewImg').src = sheetCanvas.toDataURL('image/png');
   $('saveStatus').textContent = sheetCanvas.note || '';
   $('savePng').disabled = $('savePdf').disabled = false;
@@ -342,23 +402,56 @@ $('exportBtn').onclick = async () => {
   $('noSaveHint').hidden = !!downloads;
 };
 const pngBlob = () => new Promise((r) => sheetCanvas.toBlob(r, 'image/png'));
+// A4 pages at full sheet width. Pages break only at the canvas's recorded block gaps; later
+// pages get a small running header.
 function pdfBlob() {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-  const ratio = sheetCanvas.height / sheetCanvas.width;
-  let w = 210,
-    h = w * ratio;
-  if (h > 297) {
-    h = 297;
-    w = h / ratio;
+  const cv = sheetCanvas,
+    k = 210 / cv.width, // mm per canvas px
+    topMm = 14,
+    pageMm = 297 - topMm - 6;
+  const slices = [];
+  let s = 0;
+  while (s < cv.height) {
+    const room = ((slices.length ? pageMm : 297) / k) | 0;
+    let e = cv.height;
+    if (cv.height - s > room) {
+      const fit = cv.breaks.filter((b) => b > s && b <= s + room);
+      e = fit.length ? Math.max(...fit) : s + room;
+    }
+    slices.push([s, e]);
+    s = e;
   }
-  const x0 = (210 - w) / 2;
-  pdf.addImage(sheetCanvas.toDataURL('image/png'), 'PNG', x0, 0, w, h, undefined, 'FAST');
-  // the QR code and its caption link to the groove
-  const L = sheetCanvas.link;
+  const title = S.name || 'Untitled groove';
+  slices.forEach(([a, e], i) => {
+    if (i) pdf.addPage();
+    const part = document.createElement('canvas');
+    part.width = cv.width;
+    part.height = Math.ceil(e - a);
+    part.getContext('2d').drawImage(cv, 0, a, cv.width, part.height, 0, 0, cv.width, part.height);
+    pdf.addImage(
+      part.toDataURL('image/png'),
+      'PNG',
+      0,
+      i ? topMm : 0,
+      210,
+      part.height * k,
+      undefined,
+      'FAST',
+    );
+    if (i) {
+      pdf.setFontSize(8);
+      pdf.setTextColor(102);
+      pdf.text(title, 14, 10);
+      pdf.text(`${i + 1} / ${slices.length}`, 196, 10, { align: 'right' });
+    }
+  });
+  // the QR code and its caption link to the groove, on page 1
+  const L = cv.link;
   if (L) {
-    const k = w / sheetCanvas.width;
-    pdf.link(x0 + L.x * k, L.y * k, L.w * k, L.h * k, { url: L.url });
+    pdf.setPage(1);
+    pdf.link(L.x * k, L.y * k, L.w * k, L.h * k, { url: L.url });
   }
   pdf.setProperties({
     title: S.name || 'Drum groove',

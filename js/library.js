@@ -1,10 +1,19 @@
 // Your saved loops (kept in localStorage) and the Loops panel.
 
 // ---------- library ----------
+// A name not in `names`: an existing " (2)" / " (copy)" suffix is replaced, not stacked.
+function freeName(name, names, copy = false) {
+  if (!copy && !names.has(name)) return name;
+  const root = name.replace(/ \((?:\d+|copy(?: \d+)?)\)$/, '');
+  let nm = copy ? `${root} (copy)` : `${root} (2)`,
+    k = 2;
+  while (names.has(nm)) nm = copy ? `${root} (copy ${k++})` : `${root} (${++k})`;
+  return nm;
+}
 function lib() {
   const raw = store.get('groove.library');
   if (!Array.isArray(raw)) return [];
-  return raw.slice(0, 500).flatMap((x) => {
+  return raw.flatMap((x) => {
     let st;
     try {
       st = x && typeof x === 'object' ? cleanLoop(x.state, 'Untitled groove') : null;
@@ -95,10 +104,7 @@ function renderLib() {
     dup.onclick = () => {
       const l = lib(),
         names = new Set(l.map((x) => x.state.name || 'Untitled groove'));
-      const base = `${it.state.name || 'Untitled groove'} (copy`;
-      let nm = base + ')',
-        k = 2;
-      while (names.has(nm)) nm = `${base} ${k++})`;
+      const nm = freeName(it.state.name || 'Untitled groove', names, true);
       const copy = JSON.parse(JSON.stringify(it.state));
       copy.name = nm;
       const j = l.findIndex((x) => x.id === it.id),
@@ -166,6 +172,7 @@ $('titleSave').onclick = () => {
     copy = JSON.parse(JSON.stringify(S));
   delete copy.example;
   delete copy.libId;
+  delete copy.gid;
   const i = S.libId ? l.findIndex((x) => x.id === S.libId) : -1;
   let nm = S.name || 'Untitled groove',
     renamed = false,
@@ -174,8 +181,7 @@ $('titleSave').onclick = () => {
   else {
     const names = new Set(l.map((x) => x.state.name || 'Untitled groove')),
       base = nm;
-    let k = 2;
-    while (names.has(nm)) nm = `${base} (${k++})`;
+    nm = freeName(nm, names);
     renamed = nm !== base;
     copy.name = nm;
     id = newId();
@@ -188,6 +194,14 @@ $('titleSave').onclick = () => {
     return;
   }
   S.libId = id;
+  S.gid ||= newId();
+  // undo/redo steps of this groove keep the link, so the next Save updates instead of duplicating
+  [hist, fut].forEach((a) =>
+    a.forEach((js, n) => {
+      const o = JSON.parse(js);
+      if (o.gid === S.gid && !o.libId) a[n] = JSON.stringify(Object.assign(o, { libId: id }));
+    }),
+  );
   if (renamed) {
     S.name = nm;
     $('name').value = nm;
