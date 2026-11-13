@@ -159,6 +159,12 @@ function persist() {
   store.set('groove.current', S);
   updateSaveDot();
   syncUrl();
+  syncTitle();
+}
+// The tab (and the installed app's window) is titled after the groove.
+function syncTitle() {
+  const name = (S.name || '').trim();
+  document.title = name ? `${name} · Paradoodle` : 'Paradoodle';
 }
 let urlT = 0;
 function syncUrl() {

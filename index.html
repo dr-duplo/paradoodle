@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <meta name="description" content="Doodle your grooves: a drum sketchpad for your phone." />
     <title>Paradoodle</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Paradoodle" />
+    <meta property="og:title" content="Paradoodle" />
+    <meta
+      property="og:description"
+      content="Doodle a drum groove, play it back, practise along and share it as a link."
+    />
+    <meta property="og:url" content="https://dr-duplo.github.io/paradoodle/" />
+    <meta property="og:image" content="https://dr-duplo.github.io/paradoodle/icons/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Paradoodle drum icon and name" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#11151b" />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
@@ -133,6 +146,9 @@
           <div class="barmenu" role="menu" hidden>
             <button class="btn ghost" type="button" role="menuitem" id="shareCopy">
               Copy link
+            </button>
+            <button class="btn ghost" type="button" role="menuitem" id="shareQr">
+              Show QR code
             </button>
             <button class="btn ghost" type="button" role="menuitem" id="exportBtn">
               Export sheet
@@ -319,6 +335,19 @@
       </div>
     </div>
 
+    <div class="overlay" id="qrOv" hidden>
+      <div class="sheet qrsheet" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+        <div class="row">
+          <h3 id="qrTitle">Scan to open</h3>
+          <span class="spacer" style="flex: 1"></span
+          ><button class="btn ghost" type="button" data-close>Close</button>
+        </div>
+        <div class="qrbox" id="qrBox" role="img" aria-label="QR code of the share link"></div>
+        <p class="qrname" id="qrName"></p>
+        <p class="hint" id="qrHint">Anyone with the link can open it.</p>
+      </div>
+    </div>
+
     <div class="overlay" id="exportOv" hidden>
       <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
         <div class="row">
@@ -410,8 +439,11 @@
             >MIT License</a
           >
           · Built with
-          <a href="https://www.vexflow.com/" target="_blank" rel="noopener">VexFlow</a> and
-          <a href="https://github.com/parallax/jsPDF" target="_blank" rel="noopener">jsPDF</a>
+          <a href="https://www.vexflow.com/" target="_blank" rel="noopener">VexFlow</a>,
+          <a href="https://github.com/parallax/jsPDF" target="_blank" rel="noopener">jsPDF</a> and
+          <a href="https://github.com/kazuhikoarase/qrcode-generator" target="_blank" rel="noopener"
+            >qrcode-generator</a
+          >
         </p>
       </div>
     </div>
