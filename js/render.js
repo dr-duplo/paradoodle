@@ -67,8 +67,10 @@ function renderBars() {
       lastRow = vis[vis.length - 1];
     INSTR.forEach((ins, r) => {
       if (!vis.includes(ins)) return;
-      const l = document.createElement('div');
+      const l = document.createElement('button');
+      l.type = 'button';
       l.className = 'lbl' + (ins.cym ? ' cym' : '') + (ins === lastRow ? ' row-end' : '');
+      l.dataset.id = ins.id;
       l.textContent = ins.label;
       g.appendChild(l);
       for (let s = 0; s < n; s++) {
@@ -96,6 +98,7 @@ function renderBars() {
     cols.push(colEls);
   });
   $('barsOut').textContent = S.bars.length;
+  paintMutes();
   updateSummary();
   if (!playing) renderDots(-1);
   $('barsMinus').disabled = S.bars.length <= 1;

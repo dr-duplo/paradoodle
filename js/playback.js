@@ -36,7 +36,7 @@ function tick() {
       t = nextT + (late ? sw : 0);
     INSTR.forEach((ins) => {
       const v = bar[ins.id][s];
-      if (v) triggerSound(ins.id, ins.arts[v - 1], t);
+      if (v && !isMuted(ins.id)) triggerSound(ins.id, ins.arts[v - 1], t);
     });
     if (clickOn && s % S.sub === 0) metronome(t, s === 0);
     if (countMode !== 'off' && s % S.sub === 0) sayWord(NUMS[s / S.sub], t, dur * S.sub, 1);

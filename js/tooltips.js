@@ -45,6 +45,8 @@ const hideTip = () => {
   tipEl.classList.remove('on');
 };
 function tipText(el) {
+  if (el.classList.contains('lbl'))
+    return `${isMuted(el.dataset.id) ? 'Unmute' : 'Mute'} ${el.textContent} · double-tap to hear only this`;
   const t = TIPS[el.id] ?? (el.closest('.bar-head') ? ACT_TIPS[el.dataset.act] : null);
   return typeof t === 'function' ? t() : t;
 }

@@ -696,6 +696,29 @@ select {
 .lbl.cym {
   color: var(--brass);
 }
+button.lbl {
+  border-width: 1px 0 0;
+  border-style: solid;
+  border-color: var(--line);
+  background: none;
+  color: var(--ink);
+  text-align: left;
+  padding-left: 0;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+button.lbl.cym {
+  color: var(--brass);
+}
+.lbl.off {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+.cell.rowoff {
+  opacity: 0.35;
+}
 .cell {
   border: 0;
   border-top: 1px solid var(--line);
