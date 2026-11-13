@@ -14,6 +14,11 @@ const loopHash = (st) => '#' + LINK_TAG + packLoop(st);
 const WHO_CAN_OPEN = 'Anyone with the link can open it.';
 const B32 = '0123456789abcdefghijklmnopqrstuv';
 const artBits = (ins) => Math.ceil(Math.log2(ins.arts.length + 1));
+// The rows a link of each format holds, in bit order. Format 3 came before the toms.
+const LINK_ROWS = {
+  3: ['crash', 'ride', 'hh', 'snare', 'kick', 'hhf'].map((id) => INSTR.find((i) => i.id === id)),
+  4: INSTR,
+};
 // CRC-10 (polynomial 0x233) over the code's characters, written as two more characters.
 // It catches any damage within two neighbouring characters (a typo, two swapped characters)
 // and all but about 1 in 1000 other changes, such as a link that was cut off.
@@ -44,7 +49,7 @@ function packLoop(st) {
     put(b.length, 8);
     b.forEach((x) => put(x, 8));
   };
-  put(3, 4);
+  put(4, 4);
   put(st.beats - 2, 3);
   put({ 2: 0, 3: 1, 4: 2 }[st.sub], 2);
   put(st.tempo - 40, 8);
@@ -103,13 +108,14 @@ function unpackLoop(code) {
     for (let i = 0; i < len; i++) b[i] = get(8);
     return dec.decode(b);
   };
-  const ver = get(4);
-  if (ver !== 3) return null;
+  const ver = get(4),
+    rows = LINK_ROWS[ver];
+  if (!rows) return null;
   const beats = get(3) + 2,
     sub = [2, 3, 4][get(2)],
     tempo = get(8) + 40,
     swing = 0.5 + get(5) / 100;
-  const hmask = get(INSTR.length),
+  const hmask = get(rows.length),
     nb = get(3) + 1,
     name = getStr();
   if (!sub || beats > 7) return null;
@@ -117,8 +123,8 @@ function unpackLoop(code) {
     bars = [];
   for (let i = 0; i < nb; i++) {
     const bar = { name: get(1) ? `Bar ${i + 1}` : getStr() };
-    const umask = get(INSTR.length);
-    INSTR.forEach((ins, r) => {
+    const umask = get(rows.length);
+    rows.forEach((ins, r) => {
       const w = artBits(ins);
       bar[ins.id] = Array.from({ length: n }, () => (umask & (1 << r) ? get(w) : 0));
     });
@@ -131,40 +137,35 @@ function unpackLoop(code) {
       beats,
       sub,
       swing: swing > 0.5 ? swing : undefined,
-      hidden: INSTR.filter((_, i) => hmask & (1 << i)).map((i) => i.id),
+      hidden: rows.filter((_, i) => hmask & (1 << i)).map((i) => i.id),
       bars,
     },
     'Shared groove',
   );
 }
+// Copies the groove's link. The link itself shows up only when the browser won't let us copy,
+// so it can be copied by hand.
 function shareLoop(st) {
   const hash = loopHash(st),
     url = SHARE_BASE + hash;
   const box = $('shareBox'),
     inp = $('shareUrl');
   inp.value = url;
-  box.hidden = false;
+  box.hidden = true;
   try {
     history.replaceState(null, '', hash);
   } catch {}
   const nm = st.name || 'Untitled groove';
-  const done = (ok) =>
-    libStatus(
-      ok
-        ? `Link to “${nm}” copied. ${WHO_CAN_OPEN}`
-        : `Copy the link to “${nm}” below. ${WHO_CAN_OPEN}`,
-    );
-  try {
-    navigator.clipboard.writeText(url).then(
-      () => done(true),
-      () => {
-        done(false);
-        inp.select();
-      },
-    );
-  } catch {
-    done(false);
+  const copied = () => libStatus(`Link to “${nm}” copied. ${WHO_CAN_OPEN}`);
+  const byHand = () => {
+    box.hidden = false;
+    libStatus(`Copy the link to “${nm}” below. ${WHO_CAN_OPEN}`);
     inp.select();
+  };
+  try {
+    navigator.clipboard.writeText(url).then(copied, byHand);
+  } catch {
+    byHand();
   }
 }
 $('shareCurrent').onclick = () => {

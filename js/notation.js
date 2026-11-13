@@ -10,17 +10,29 @@ function loadVF() {
     return vfLib();
   });
 }
-// percussion staff positions: bass F4, snare C5, ride F5, hi-hat G5, crash A5 (ledger line)
+// percussion staff positions: bass F4, floor tom A4, snare C5, mid tom D5, high tom E5,
+// ride F5, hi-hat G5, crash A5 (ledger line)
 const STAFF_KEY = {
   crash: { hit: 'a/5/x2' },
   ride: { hit: 'f/5/x2', ghost: 'f/5/x2' },
   hh: { closed: 'g/5/x2', open: 'g/5/x2', ghost: 'g/5/x2' },
   snare: { hit: 'c/5', rim: 'c/5/cx', ghost: 'c/5' },
+  tom: { high: 'e/5', mid: 'd/5', floor: 'a/4' },
   kick: { hit: 'f/4' },
   hhf: { hit: 'd/4/x2' },
 };
-const KEY_RANK = { 'd/4': -1, 'f/4': 0, 'c/5': 1, 'f/5': 2, 'g/5': 3, 'a/5': 4 };
-const HANDS = ['crash', 'ride', 'hh', 'snare'],
+const KEY_RANK = {
+  'd/4': -1,
+  'f/4': 0,
+  'a/4': 0.5,
+  'c/5': 1,
+  'd/5': 1.3,
+  'e/5': 1.6,
+  'f/5': 2,
+  'g/5': 3,
+  'a/5': 4,
+};
+const HANDS = ['crash', 'ride', 'hh', 'snare', 'tom'],
   FEET = ['kick', 'hhf'];
 const INSTR_BY = Object.fromEntries(INSTR.map((i) => [i.id, i]));
 const STAFF_ROW = 118,
@@ -154,6 +166,9 @@ const STAFF_KEY_ITEMS = [
   ['c/5', 'Snare'],
   ['c/5/cx', 'Rim'],
   ['c/5', 'Ghost', 'ghost'],
+  ['e/5', 'High tom'],
+  ['d/5', 'Mid tom'],
+  ['a/4', 'Floor tom'],
   ['f/4', 'Bass', null, -1],
   ['d/4/x2', 'HH foot', null, -1],
 ];
