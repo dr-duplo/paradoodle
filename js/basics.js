@@ -95,6 +95,35 @@ const store = {
 };
 
 // Icons of the Save and Share buttons, plus the check mark they show after a tap.
+// Libraries loaded from CDNs on first use. The browser checks each file against its hash and
+// refuses it if it changed; scripts/build.mjs also allows exactly these URLs in the page's CSP.
+const LIBS = {
+  vexflow: {
+    src: 'https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/cjs/vexflow.js',
+    integrity: 'sha384-HcSKHU8C+2rx18IlCMSlVWuygC4W9XRY8ebpaoE3Tg1iJO0g64QCxO2vO5HXIokW',
+  },
+  jspdf: {
+    src: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js',
+    integrity: 'sha384-qovJwSBbRDPP5cEjCp8S0UP66wrvnjaa60XMOGzTNanrThcrGfXfnZkvgY8N1KT3',
+  },
+};
+const libLoads = {};
+function loadLib(name) {
+  const { src, integrity } = LIBS[name];
+  libLoads[name] ??= new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.integrity = integrity;
+    s.crossOrigin = 'anonymous';
+    s.onload = res;
+    s.onerror = () => {
+      delete libLoads[name];
+      rej(new Error(`${name} failed to load`));
+    };
+    document.head.appendChild(s);
+  });
+  return libLoads[name];
+}
 const ICON_SAVE = $('titleSave').innerHTML,
   ICON_LINK = $('nameShare').innerHTML,
   ICON_OK =
