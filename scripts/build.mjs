@@ -14,9 +14,11 @@ if (!files.length) throw new Error('No <script src="js/..."> tags found in index
 const source = (await Promise.all(files.map((f) => readFile(f, 'utf8')))).join(';\n');
 const { code: jsMin } = await transform(source, { loader: 'js', minify: true, format: 'iife' });
 
-let page = html
-  .replace('<link rel="stylesheet" href="styles.css">', () => `<style>${cssMin.trim()}</style>`)
-  .replace(scriptTag, '');
+const styleTag = /<link rel="stylesheet" href="styles\.css"\s*\/?>/;
+if (!styleTag.test(html))
+  throw new Error('No <link rel="stylesheet" href="styles.css"> found in index.html');
+
+let page = html.replace(styleTag, () => `<style>${cssMin.trim()}</style>`).replace(scriptTag, '');
 page = page
   .replace('</body>', () => `<script>${jsMin.trim()}</script>\n</body>`)
   .split('\n')
@@ -24,6 +26,9 @@ page = page
   .filter(Boolean)
   .join('\n');
 if (!page.includes('<script>')) page += `\n<script>${jsMin.trim()}</script>`;
+
+if (/href="styles\.css"|src="js\//.test(page))
+  throw new Error('dist/index.html still links to source files');
 
 await mkdir('dist', { recursive: true });
 await writeFile('dist/index.html', page + '\n');
