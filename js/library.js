@@ -5,7 +5,7 @@ function lib() {
   const raw = store.get('groove.library');
   if (!Array.isArray(raw)) return [];
   return raw.slice(0, 500).flatMap((x) => {
-    let st = null;
+    let st;
     try {
       st = x && typeof x === 'object' ? cleanLoop(x.state, 'Untitled loop') : null;
     } catch {

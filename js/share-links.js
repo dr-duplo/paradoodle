@@ -204,7 +204,7 @@ $('shareUrl').addEventListener('focus', (e) => e.target.select());
 function openFromLink() {
   const m = /^#loop-(.*)$/s.exec(location.hash);
   if (!m) return;
-  let st = null;
+  let st;
   try {
     st = unpackLoop(m[1]);
   } catch {
