@@ -4,6 +4,17 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      # eslint and @eslint/js must move together, or npm ci fails
+      eslint:
+        patterns: ['eslint', '@eslint/*']
+    ignore:
+      # ESLint 10 currently depends on a minimatch version with a known DoS advisory
+      # (GHSA-g3hv-75wg-m249). Remove this once ESLint 10 ships a fixed dependency.
+      - dependency-name: 'eslint'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@eslint/js'
+        update-types: ['version-update:semver-major']
   - package-ecosystem: github-actions
     directory: /
     schedule:

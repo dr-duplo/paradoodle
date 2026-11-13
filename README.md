@@ -2,6 +2,8 @@
 
 **Doodle your grooves.**
 
+**Try it now: [dr-duplo.github.io/paradoodle](https://dr-duplo.github.io/paradoodle/)**. It runs in any modern browser and is made for phones.
+
 A groove pops into your head on the bus, in the rehearsal room or halfway through a song you're listening to. Paradoodle is a place to get it down before it's gone. Tap the beat into a grid on your phone, play it back to check it feels right, and when it does, export a proper drum sheet with staff notation to bring to the next session.
 
 ![Paradoodle on a phone in landscape, showing the Kraut Break on the step grid](docs/screenshot.png)
@@ -34,7 +36,7 @@ The notation library (VexFlow) and the PDF library (jsPDF) load from public CDNs
 
 ### GitHub Pages
 
-`.github/workflows/pages.yml` builds the site and publishes it on every push to `main`. Set **Settings → Pages → Source** to **GitHub Actions** once, and the app is served at `https://<user>.github.io/<repo>/`.
+`.github/workflows/pages.yml` builds the site and publishes it on every push to `main`. The live app is at [dr-duplo.github.io/paradoodle](https://dr-duplo.github.io/paradoodle/). For a fork, set **Settings → Pages → Source** to **GitHub Actions** once, and it is served at `https://<user>.github.io/<repo>/`.
 
 ## How the code is organized
 
