@@ -19,6 +19,6 @@ syncUrl();
 addEventListener('pagehide', () => {
   clearTimeout(urlT);
   try {
-    history.replaceState(null, '', '#loop-' + packLoop(S));
+    history.replaceState(null, '', loopHash(S));
   } catch {}
 });

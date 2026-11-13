@@ -1,11 +1,16 @@
-// Share links: packs a whole loop into a short #loop-... code,
-// unpacks it again, and keeps the page address in step with every edit.
+// Share links: packs a whole loop into a short #paradoodle-... code,
+// unpacks it again, keeps the page address in step with every edit,
+// and opens a loop from any pasted text that contains such a code.
 
 // ---------- share links ----------
 // The viewer passes only a plain #name (letters, digits, hyphens) from the link to the page,
 // so a loop is bit-packed and written in base32 (0-9a-v). Keep INSTR order and arts stable:
 // old links decode against it.
 const SHARE_BASE = location.href.split('#')[0];
+// Every code starts with this tag, so a loop can be found inside any text or URL.
+const LINK_TAG = 'paradoodle-';
+const LINK_IN_TEXT = /paradoodle-([0-9a-v]+)/;
+const loopHash = (st) => '#' + LINK_TAG + packLoop(st);
 const WHO_CAN_OPEN = 'Anyone with the link can open it.';
 const B32 = '0123456789abcdefghijklmnopqrstuv';
 const artBits = (ins) => Math.ceil(Math.log2(ins.arts.length + 1));
@@ -114,14 +119,14 @@ function unpackLoop(code) {
   );
 }
 function shareLoop(st) {
-  const code = packLoop(st),
-    url = `${SHARE_BASE}#loop-${code}`;
+  const hash = loopHash(st),
+    url = SHARE_BASE + hash;
   const box = $('shareBox'),
     inp = $('shareUrl');
   inp.value = url;
   box.hidden = false;
   try {
-    history.replaceState(null, '', '#loop-' + code);
+    history.replaceState(null, '', hash);
   } catch {}
   const nm = st.name || 'Untitled loop';
   const done = (ok) =>
@@ -158,11 +163,11 @@ $('nameShare').onclick = (e) => {
 $('shareCopy').onclick = () => {
   closeMenus();
   const btn = $('nameShare'),
-    code = packLoop(S),
-    url = `${SHARE_BASE}#loop-${code}`,
+    hash = loopHash(S),
+    url = SHARE_BASE + hash,
     nm = S.name || 'Untitled loop';
   try {
-    history.replaceState(null, '', '#loop-' + code);
+    history.replaceState(null, '', hash);
   } catch {}
   const fallback = () => {
     $('libBtn').click();
@@ -202,11 +207,11 @@ $('copyShare').onclick = () => {
 };
 $('shareUrl').addEventListener('focus', (e) => e.target.select());
 function openFromLink() {
-  const m = /^#loop-(.*)$/s.exec(location.hash);
-  if (!m) return;
+  if (!location.hash.startsWith('#' + LINK_TAG)) return;
+  const code = location.hash.slice(1 + LINK_TAG.length);
   let st;
   try {
-    st = unpackLoop(m[1]);
+    st = unpackLoop(code);
   } catch {
     st = null;
   }
@@ -219,7 +224,7 @@ function openFromLink() {
   }
   let same = false;
   try {
-    same = packLoop(S) === m[1];
+    same = packLoop(S) === code;
   } catch {}
   if (same) return;
   commit();
@@ -230,3 +235,12 @@ function openFromLink() {
   );
 }
 addEventListener('hashchange', openFromLink);
+// Pasting a link (or a chat message that contains one) anywhere outside a text field opens the loop.
+document.addEventListener('paste', (e) => {
+  const t = e.target;
+  if (t.closest?.('input, textarea, [contenteditable]')) return;
+  const m = LINK_IN_TEXT.exec(e.clipboardData?.getData('text') || '');
+  if (!m) return;
+  e.preventDefault();
+  location.hash = LINK_TAG + m[1];
+});
