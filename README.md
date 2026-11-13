@@ -18,7 +18,7 @@ A _paradiddle_ is one of the first rudiments every drummer learns: right, left, 
 
 **Sketch.** The grid has rows for crash, ride, hi-hat, snare, bass drum and hi-hat foot. Tap a cell to cycle through its sounds (closed, open or ghosted hi-hat; hit, rim or ghost on the snare) and hold it to clear. Bars can have 2 to 7 beats in 8ths, triplets or 16ths, with as much swing as the groove needs. A loop holds up to 8 bars, and you can name, reorder, duplicate or solo each one.
 
-**Listen.** Playback uses a small drum kit synthesised in the browser. A metronome click, a flash on every beat or a spoken "1, 2, 3, 4" help you lock in, and the bar that's playing scrolls into view.
+**Listen.** Playback uses a small drum kit synthesised in the browser. A metronome click, a flash on every beat or a spoken "1, 2, 3, 4" help you lock in, and the bar that's playing scrolls into view. Tap an instrument's name to mute it while you listen, or double-tap it to hear that instrument alone; a second double-tap brings everything back.
 
 **Keep.** Tap the save icon at the top to keep the loop in your library under **Loops**; a dot on the icon means there are unsaved changes. Undo and redo sit at the top too (⌘Z / Ctrl+Z, ⇧⌘Z / Ctrl+Y), and you can back up the whole library as a JSON file.
 
@@ -47,6 +47,7 @@ There is no framework and no bundler during development. `index.html` holds the 
 | `js/state.js`        | The loop being edited (`S`), checking and repairing loops, undo history, the unsaved-changes dot |
 | `js/render.js`       | Draws the summary line, kit chips and every bar's grid                                           |
 | `js/editing.js`      | Tapping cells and everything else you can change about a loop                                    |
+| `js/mute.js`         | Muting kit rows while listening (tap or double-tap an instrument name)                           |
 | `js/audio.js`        | The synthesised drum kit and the spoken count                                                    |
 | `js/playback.js`     | Play and stop, the scheduler, playhead, click and beat flash                                     |
 | `js/notation.js`     | Staff notation with VexFlow                                                                      |
