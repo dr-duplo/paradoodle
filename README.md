@@ -34,7 +34,7 @@ To get you started, the app opens with the **Kraut Break**, a two-bar groove ful
 
 Open `index.html` in a browser. That's it: the source runs as is, without a build step.
 
-The notation library (VexFlow) and the PDF library (jsPDF) load from public CDNs the first time you export, so exporting needs a connection. Sketching and playback work offline.
+The notation library (VexFlow) and the PDF library (jsPDF) load from public CDNs the first time you export, so exporting needs a connection. Both are pinned to an exact version, and the browser checks each file against its integrity hash before running it. Sketching and playback work offline.
 
 ## How the code is organized
 
@@ -42,7 +42,7 @@ There is no framework and no bundler during development. `index.html` holds the 
 
 | File                 | What it does                                                                                     |
 | -------------------- | ------------------------------------------------------------------------------------------------ |
-| `js/basics.js`       | The drum kit, the note symbols and small helpers (`$`, `esc`, `store`)                           |
+| `js/basics.js`       | The drum kit, the note symbols, small helpers (`$`, `esc`, `store`) and the pinned CDN libraries |
 | `js/theme.js`        | The light and dark theme and the moon/sun button                                                 |
 | `js/state.js`        | The loop being edited (`S`), checking and repairing loops, undo history, the unsaved-changes dot |
 | `js/render.js`       | Draws the summary line, kit chips and every bar's grid                                           |
@@ -71,7 +71,7 @@ npm run check   # formatting, lint and build in one go
 
 - `npm run format` formats everything with Prettier, and `npm run format:check` only reports.
 - `npm run lint` runs ESLint.
-- `npm run build` writes `dist/index.html`: a single minified file with the styles and scripts inlined. That's the version the live app runs.
+- `npm run build` writes `dist/index.html`: a single minified file with the styles and scripts inlined, plus a Content Security Policy that lets the page run only its own script and the two pinned libraries. That's the version the live app runs.
 
 Every pull request runs the same checks plus `npm audit` (`.github/workflows/ci.yml`). CodeQL scans the code for security problems, and Dependabot proposes dependency and workflow updates every week. Changes reach `main` only through pull requests, and a pull request merges only when its **CI / check** passes.
 

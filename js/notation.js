@@ -1,23 +1,14 @@
 // Staff notation with VexFlow, loaded the first time it is needed.
 
 // ---------- staff notation (VexFlow, loaded on first use) ----------
-let vfPromise = null;
 const vfLib = () =>
   window.Vex && (window.Vex.Flow || window.Vex.default?.Flow || window.Vex.default || window.Vex);
 function loadVF() {
   if (vfLib()?.Stave) return Promise.resolve(vfLib());
-  if (!vfPromise)
-    vfPromise = new Promise((res, rej) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/cjs/vexflow.js';
-      s.onload = () => (vfLib()?.Stave ? res(vfLib()) : rej(new Error('VexFlow missing')));
-      s.onerror = () => {
-        vfPromise = null;
-        rej(new Error('VexFlow failed to load'));
-      };
-      document.head.appendChild(s);
-    });
-  return vfPromise;
+  return loadLib('vexflow').then(() => {
+    if (!vfLib()?.Stave) throw new Error('VexFlow missing');
+    return vfLib();
+  });
 }
 // percussion staff positions: bass F4, snare C5, ride F5, hi-hat G5, crash A5 (ledger line)
 const STAFF_KEY = {

@@ -61,7 +61,8 @@ async function renderSheet(style) {
   const barBlock = headH + countH + ROWS.length * rowH + gap;
   const gridH = showGrid ? S.bars.length * barBlock + (showStaff ? 50 : 0) : 0;
   const legendH = (showGrid ? 150 : 0) + (showStaff ? 300 : 0);
-  const H = M + 170 + staffH + gridH + legendH + M * 0.6;
+  const footH = 60;
+  const H = M + 170 + staffH + gridH + legendH + footH + M * 0.6;
   const cv = document.createElement('canvas');
   cv.width = W;
   cv.height = Math.ceil(H);
@@ -194,6 +195,22 @@ async function renderSheet(style) {
       }),
     );
   }
+  // footer: where the sheet came from
+  const fy = cv.height - M * 0.6;
+  ctx.fillStyle = LIGHT;
+  ctx.fillRect(M, fy - 40, W - 2 * M, 1.5);
+  ctx.textAlign = 'left';
+  ctx.fillStyle = MUTED;
+  ctx.font = `500 20px ${FB}`;
+  ctx.fillText('Made with', M, fy);
+  const lead = ctx.measureText('Made with ').width;
+  ctx.font = `700 22px ${FD}`;
+  ctx.fillStyle = INK;
+  ctx.fillText('PARADOODLE', M + lead, fy);
+  ctx.textAlign = 'right';
+  ctx.fillStyle = MUTED;
+  ctx.font = `500 19px ${FM}`;
+  ctx.fillText('dr-duplo.github.io/paradoodle', W - M, fy);
   cv.note = note;
   return cv;
 }
@@ -272,6 +289,7 @@ $('exportBtn').onclick = async () => {
   closeMenus();
   $('saveStatus').textContent = '';
   openOv('exportOv');
+  loadLib('jspdf').catch(() => {});
   await refreshPreview();
   await Promise.race([dlReady, new Promise((r) => setTimeout(r, 1500))]);
   $('saveRow').hidden = !downloads;
@@ -288,15 +306,30 @@ function pdfBlob() {
     h = 297;
     w = h / ratio;
   }
-  pdf.addImage(sheetCanvas.toDataURL('image/png'), 'PNG', (210 - w) / 2, 0, w, h);
-  pdf.setProperties({ title: S.name || 'Drum loop' });
+  pdf.addImage(
+    sheetCanvas.toDataURL('image/png'),
+    'PNG',
+    (210 - w) / 2,
+    0,
+    w,
+    h,
+    undefined,
+    'FAST',
+  );
+  pdf.setProperties({ title: S.name || 'Drum loop', subject: 'Drum sheet', creator: 'Paradoodle' });
   return pdf.output('blob');
 }
 async function save(kind) {
   if (!downloads || !sheetCanvas) return;
   const st = $('saveStatus');
   try {
-    if (kind === 'pdf' && !window.jspdf) {
+    if (
+      kind === 'pdf' &&
+      !(await loadLib('jspdf').then(
+        () => !!window.jspdf,
+        () => false,
+      ))
+    ) {
       st.textContent = 'The PDF library did not load. Save as PNG instead.';
       return;
     }
