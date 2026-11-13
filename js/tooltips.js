@@ -18,6 +18,8 @@ const TIPS = {
   play: () => (playing ? 'Stop' : 'Play the loop'),
   countBtn: 'Spoken count: says 1 2 3 4 on the beats',
   flashBtn: 'Flash the background on every beat',
+  themeBtn: () => (isDark() ? 'Switch to the light theme' : 'Switch to the dark theme'),
+  ghLink: 'Paradoodle on GitHub: source, issues and ideas',
   click: 'Metronome click on every beat',
   undo: 'Undo the last change',
   redo: 'Redo what you undid',
@@ -48,7 +50,7 @@ function tipText(el) {
 }
 document.addEventListener('pointerover', (e) => {
   if (e.pointerType !== 'mouse') return;
-  const el = e.target.closest('button');
+  const el = e.target.closest('button, a[id]');
   if (!el || el === tipFor) return;
   hideTip();
   if (!tipText(el)) return;

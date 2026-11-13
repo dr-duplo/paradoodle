@@ -20,13 +20,13 @@ A _paradiddle_ is one of the first rudiments every drummer learns: right, left, 
 
 **Listen.** Playback uses a small drum kit synthesised in the browser. A metronome click, a flash on every beat or a spoken "1, 2, 3, 4" help you lock in, and the bar that's playing scrolls into view.
 
-**Keep.** Tap the save icon next to the loop's name to keep it in your library under **Loops**; a dot on the icon means there are unsaved changes. Undo and redo sit at the top too (⌘Z / Ctrl+Z, ⇧⌘Z / Ctrl+Y), and you can back up the whole library as a JSON file.
+**Keep.** Tap the save icon at the top to keep the loop in your library under **Loops**; a dot on the icon means there are unsaved changes. Undo and redo sit at the top too (⌘Z / Ctrl+Z, ⇧⌘Z / Ctrl+Y), and you can back up the whole library as a JSON file.
 
-**Share.** Every loop fits into a link: tap the share button next to the name and the link is copied. Send it to your bandmate and they open exactly what you wrote, or paste one into the app to open it. When the app runs as its own page, the address follows along as you edit, so a bookmark or a copied address always holds the current groove.
+**Share.** Every loop fits into a link: tap the share button at the top right and copy the link. Send it to your bandmate and they open exactly what you wrote, or paste one into the app to open it. When the app runs as its own page, the address follows along as you edit, so a bookmark or a copied address always holds the current groove.
 
 **Print.** The same share button exports a drum sheet with staff notation, the grid, or both, as a PNG or an A4 PDF.
 
-Not sure what a button does? Hover over it with a mouse and a short tip tells you.
+The moon button next to the playback toggles switches between a dark and a light theme. Not sure what a button does? Hover over it with a mouse and a short tip tells you.
 
 To get you started, the app opens with the **Kraut Break**, a two-bar groove full of ghost notes. You'll find it again under Loops → Examples.
 
@@ -43,6 +43,7 @@ There is no framework and no bundler during development. `index.html` holds the 
 | File                 | What it does                                                                                     |
 | -------------------- | ------------------------------------------------------------------------------------------------ |
 | `js/basics.js`       | The drum kit, the note symbols and small helpers (`$`, `esc`, `store`)                           |
+| `js/theme.js`        | The light and dark theme and the moon/sun button                                                 |
 | `js/state.js`        | The loop being edited (`S`), checking and repairing loops, undo history, the unsaved-changes dot |
 | `js/render.js`       | Draws the summary line, kit chips and every bar's grid                                           |
 | `js/editing.js`      | Tapping cells and everything else you can change about a loop                                    |
