@@ -21,7 +21,7 @@ A _paradiddle_ is one of the first rudiments every drummer learns: right, left, 
 
 ## In detail
 
-**Sketch.** The grid has rows for crash, ride, hi-hat, snare, bass drum and hi-hat foot. Tap a cell to cycle through its sounds (closed, open or ghosted hi-hat; hit, rim or ghost on the snare) and hold it to clear. Bars can have 2 to 7 beats in 8ths, triplets or 16ths, with as much swing as the groove needs. A groove holds up to 8 bars, and you can name, reorder, duplicate or solo each one.
+**Sketch.** The grid has rows for crash, ride, hi-hat, snare, toms, bass drum and hi-hat foot. Tap a cell to cycle through its sounds (closed, open or ghosted hi-hat; hit, rim or ghost on the snare; high, mid or floor tom) and hold it to clear. Bars can have 2 to 7 beats in 8ths, triplets or 16ths, with as much swing as the groove needs. A groove holds up to 8 bars, and you can name, reorder, duplicate or solo each one.
 
 **Listen.** Playback uses a small drum kit synthesised in the browser. A metronome click, a flash on every beat or a spoken "1, 2, 3, 4" help you lock in, and the bar that's playing scrolls into view. Tap an instrument's name to mute it, or double-tap it to hear that instrument alone; double-tap again to bring everything back.
 
@@ -109,22 +109,24 @@ The code is the groove packed into bits, written most significant bit first and 
 
 | Field             | Bits           | Value                                                                         |
 | ----------------- | -------------- | ----------------------------------------------------------------------------- |
-| Format version    | 4              | `3`                                                                           |
+| Format version    | 4              | `4`                                                                           |
 | Beats per bar     | 3              | beats − 2 (2 to 7 beats)                                                      |
 | Feel              | 2              | `0` 8ths, `1` triplets, `2` 16ths                                             |
 | Tempo             | 8              | BPM − 40                                                                      |
 | Swing             | 5              | swing % − 50 (0 to 25)                                                        |
-| Hidden kit rows   | 6              | one bit per row, see below                                                    |
+| Hidden kit rows   | 7              | one bit per row, see below                                                    |
 | Bars              | 3              | bars − 1 (1 to 8 bars)                                                        |
 | Groove name       | 8 + 8 per byte | UTF-8 byte length, then the bytes (at most 255)                               |
 | Then for each bar |                |                                                                               |
 | Default name      | 1              | `1` if the bar is called "Bar _n_", `0` if a name follows                     |
 | Bar name          | 8 + 8 per byte | only when the flag is `0`, same format as the groove name                     |
-| Rows with notes   | 6              | one bit per row, see below                                                    |
+| Rows with notes   | 7              | one bit per row, see below                                                    |
 | Steps             | per used row   | beats × 2, 3 or 4 steps (by feel) for each row whose bit is set, in kit order |
 | Checksum          | 10             | CRC-10 of the padded code, as two more characters                             |
 
-Both row masks use the kit order, with bit 0 (the lowest) for crash, then ride, hi-hat, snare, bass drum and bit 5 for hi-hat foot. A step is `0` for no note or the number of the sound: 1 bit for crash, bass drum and hi-hat foot, which have one sound each, and 2 bits for ride, hi-hat and snare. A row without notes costs only its bit in the mask.
+Both row masks use the kit order, with bit 0 (the lowest) for crash, then ride, hi-hat, snare, toms, bass drum and bit 6 for hi-hat foot. A step is `0` for no note or the number of the sound: 1 bit for crash, bass drum and hi-hat foot, which have one sound each, and 2 bits for ride, hi-hat, snare and toms. A row without notes costs only its bit in the mask.
+
+Links made before the toms arrived use format `3`. It is the same except that both masks have 6 bits, without the toms, and the app still opens them.
 
 ## Built with
 

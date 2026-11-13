@@ -66,11 +66,11 @@ function noise(t, dur, vel, filters) {
   src.stop(t + dur + 0.03);
   return g;
 }
-function tone(t, type, f0, f1, dur, vel) {
+function tone(t, type, f0, f1, dur, vel, sweep = 0.6) {
   const o = audio.createOscillator();
   o.type = type;
   o.frequency.setValueAtTime(f0, t);
-  if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.6);
+  if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + dur * sweep);
   o.connect(env(t, vel, dur));
   o.start(t);
   o.stop(t + dur + 0.03);
@@ -88,6 +88,11 @@ function triggerSound(id, art, t) {
   if (id === 'kick') {
     tone(t, 'sine', 150, 42, 0.42, v);
     noise(t, 0.015, v * 0.25, [filt('highpass', 2500)]);
+  } else if (id === 'tom') {
+    // high, mid and floor tom, a fourth and a fifth apart (about G3, D3 and G#2)
+    const [f, dur] = { high: [196, 0.38], mid: [147, 0.48], floor: [104, 0.62] }[art.k];
+    tone(t, 'sine', f * 1.45, f, dur, v * 0.95, 0.35);
+    noise(t, 0.012, v * 0.22, [filt('highpass', 2200)]);
   } else if (id === 'snare') {
     if (art.k === 'rim') {
       noise(t, 0.09, v * 0.95, [filt('bandpass', 2600, 1.2)]);

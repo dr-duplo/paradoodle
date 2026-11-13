@@ -2,12 +2,14 @@
 
 // ---------- example grooves ----------
 // one string per row, one character per grid step:
-// crash x · ride x hit, g ghost · hi-hat x closed, o open, g ghost · snare o hit, r rim, g ghost · bass o
+// crash x · ride x hit, g ghost · hi-hat x closed, o open, g ghost · snare o hit, r rim, g ghost
+// · toms h high, m mid, f floor · bass o · hi-hat foot x
 const CH = {
   crash: { x: 1 },
   ride: { x: 1, g: 2 },
   hh: { x: 1, o: 2, g: 3 },
   snare: { o: 1, r: 2, g: 3 },
+  tom: { h: 1, m: 2, f: 3 },
   kick: { o: 1 },
   hhf: { x: 1 },
 };

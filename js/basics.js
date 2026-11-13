@@ -32,6 +32,15 @@ const INSTR = [
       { k: 'ghost', name: 'Ghost', g: 'gdot', v: 0.22 },
     ],
   },
+  {
+    id: 'tom',
+    label: 'Toms',
+    arts: [
+      { k: 'high', name: 'High', g: 'tomhi', v: 0.95 },
+      { k: 'mid', name: 'Mid', g: 'tommid', v: 0.95 },
+      { k: 'floor', name: 'Floor', g: 'tomlo', v: 1 },
+    ],
+  },
   { id: 'kick', label: 'Bass', arts: [{ k: 'hit', name: 'Hit', g: 'dot', v: 1 }] },
   { id: 'hhf', label: 'HH foot', cym: true, arts: [{ k: 'hit', name: 'HH foot', g: 'x', v: 0.8 }] },
 ];
@@ -45,6 +54,10 @@ const GLYPHS = {
     { d: 'M9.6 9.6L14.4 14.4M14.4 9.6L9.6 14.4', s: 1 },
   ],
   dot: [{ d: 'M5.6 12a6.4 6.4 0 1 0 12.8 0a6.4 6.4 0 1 0 -12.8 0', f: 1 }],
+  // toms: a smaller dot high, in the middle or low in the cell, as on the staff
+  tomhi: [{ d: 'M7.4 7.4a4.6 4.6 0 1 0 9.2 0a4.6 4.6 0 1 0 -9.2 0', f: 1 }],
+  tommid: [{ d: 'M7.4 12a4.6 4.6 0 1 0 9.2 0a4.6 4.6 0 1 0 -9.2 0', f: 1 }],
+  tomlo: [{ d: 'M7.4 16.6a4.6 4.6 0 1 0 9.2 0a4.6 4.6 0 1 0 -9.2 0', f: 1 }],
   rim: [
     { d: 'M4.4 12a7.6 7.6 0 1 0 15.2 0a7.6 7.6 0 1 0 -15.2 0', s: 1 },
     { d: 'M8.7 8.7L15.3 15.3M15.3 8.7L8.7 15.3', s: 1 },
