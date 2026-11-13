@@ -13,7 +13,15 @@ const scriptTag = /<script src="(js\/[^"]+)"><\/script>\n?/g;
 const files = [...html.matchAll(scriptTag)].map((m) => m[1]);
 if (!files.length) throw new Error('No <script src="js/..."> tags found in index.html');
 const source = (await Promise.all(files.map((f) => readFile(f, 'utf8')))).join(';\n');
-const { code: jsMin } = await transform(source, { loader: 'js', minify: true, format: 'iife' });
+// The licence notice stays at the top of the script, so every copy of the page carries it.
+const LICENSE_BANNER =
+  '/*! Paradoodle · © 2026 dr-duplo · MIT License · https://github.com/dr-duplo/paradoodle */';
+const { code: jsMin } = await transform(source, {
+  loader: 'js',
+  minify: true,
+  format: 'iife',
+  banner: LICENSE_BANNER,
+});
 // The script goes into the page as it is, so it must not end its own <script> element early.
 const inlineJs = jsMin.trim();
 if (/<\/script/i.test(inlineJs)) throw new Error('The minified script contains "</script"');
