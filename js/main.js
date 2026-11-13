@@ -22,3 +22,6 @@ addEventListener('pagehide', () => {
     history.replaceState(null, '', loopHash(S));
   } catch {}
 });
+// Installable app: register the offline service worker (not available when opened as a file).
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol))
+  navigator.serviceWorker.register('sw.js').catch(() => {});

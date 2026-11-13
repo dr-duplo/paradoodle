@@ -23,6 +23,11 @@ export default [
     },
   },
   {
+    // the offline service worker runs on its own, with the service-worker globals
+    files: ['sw.js'],
+    languageOptions: { ecmaVersion: 2023, sourceType: 'script', globals: globals.serviceworker },
+  },
+  {
     files: ['scripts/**/*.mjs', 'eslint.config.mjs'],
     languageOptions: { sourceType: 'module', globals: globals.node },
   },
