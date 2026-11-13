@@ -129,6 +129,25 @@ header.top {
   text-transform: uppercase;
   color: var(--muted);
 }
+.brand {
+  display: inline-flex;
+  align-items: center;
+}
+.ghmark {
+  display: inline-grid;
+  place-items: center;
+  margin: -8px 0 -8px 2px;
+  padding: 8px;
+  border-radius: 8px;
+  color: var(--muted);
+}
+.ghmark:hover {
+  color: var(--ink);
+}
+.ghmark svg {
+  width: 16px;
+  height: 16px;
+}
 .top .spacer {
   flex: 1;
 }
@@ -830,6 +849,7 @@ select {
 .toggles {
   display: flex;
   gap: 8px;
+  margin-left: auto;
 }
 .tbtn {
   min-width: 46px;
@@ -840,6 +860,12 @@ select {
   width: 22px;
   height: 22px;
   display: block;
+}
+.themebtn {
+  margin-left: 6px;
+}
+:root[data-theme='light'] {
+  color-scheme: light;
 }
 .tip {
   position: fixed;
@@ -925,10 +951,6 @@ select {
   font-size: 13px;
   color: var(--muted);
   margin: 8px 0 0;
-}
-.hint.about a {
-  color: var(--accent);
-  font-weight: 600;
 }
 .status {
   font-size: 13px;
@@ -1227,8 +1249,11 @@ select {
     flex: 0 0 auto;
     order: -1;
   }
-  header.top > .brand {
+  header.top > .brand .brandname {
     display: none;
+  }
+  .ghmark {
+    margin-left: -8px;
   }
   .name {
     font-size: 26px;
