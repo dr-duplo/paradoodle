@@ -794,7 +794,7 @@ button.lbl.cym {
 }
 
 .addbar {
-  align-self: flex-start;
+  align-self: center;
 }
 .staffcard {
   background: #ffffff;
