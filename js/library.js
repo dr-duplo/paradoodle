@@ -7,7 +7,7 @@ function lib() {
   return raw.slice(0, 500).flatMap((x) => {
     let st;
     try {
-      st = x && typeof x === 'object' ? cleanLoop(x.state, 'Untitled loop') : null;
+      st = x && typeof x === 'object' ? cleanLoop(x.state, 'Untitled groove') : null;
     } catch {
       st = null;
     }
@@ -28,17 +28,17 @@ function renderLib() {
   list.innerHTML = '';
   if (!items.length) {
     list.innerHTML =
-      '<li class="empty">No saved loops yet. Save the current one to keep it here.</li>';
+      '<li class="empty">No saved grooves yet. Save the current one to keep it here.</li>';
     return;
   }
   items.forEach((it, idx) => {
     const li = document.createElement('li');
-    li.dataset.name = it.state.name || 'Untitled loop';
+    li.dataset.name = it.state.name || 'Untitled groove';
     li.dataset.id = it.id;
     const t = document.createElement('div');
     t.className = 't';
     const nm = document.createElement('b');
-    nm.textContent = it.state.name || 'Untitled loop';
+    nm.textContent = it.state.name || 'Untitled groove';
     const meta = document.createElement('small');
     meta.textContent = `${it.state.beats}/4 · ${it.state.tempo} BPM · ${it.state.bars.length} bar${it.state.bars.length > 1 ? 's' : ''}`;
     t.append(nm, meta);
@@ -85,17 +85,17 @@ function renderLib() {
     exp.className = 'btn ghost';
     exp.type = 'button';
     exp.textContent = 'Export';
-    exp.setAttribute('aria-label', `Export ${it.state.name || 'Untitled loop'} as a file`);
+    exp.setAttribute('aria-label', `Export ${it.state.name || 'Untitled groove'} as a file`);
     exp.onclick = () => exportOne(it.state);
     const dup = document.createElement('button');
     dup.className = 'btn ghost';
     dup.type = 'button';
     dup.textContent = 'Duplicate';
-    dup.setAttribute('aria-label', `Duplicate ${it.state.name || 'Untitled loop'}`);
+    dup.setAttribute('aria-label', `Duplicate ${it.state.name || 'Untitled groove'}`);
     dup.onclick = () => {
       const l = lib(),
-        names = new Set(l.map((x) => x.state.name || 'Untitled loop'));
-      const base = `${it.state.name || 'Untitled loop'} (copy`;
+        names = new Set(l.map((x) => x.state.name || 'Untitled groove'));
+      const base = `${it.state.name || 'Untitled groove'} (copy`;
       let nm = base + ')',
         k = 2;
       while (names.has(nm)) nm = `${base} ${k++})`;
@@ -106,7 +106,7 @@ function renderLib() {
       l.splice(j >= 0 ? j + 1 : 0, 0, { id, state: copy, at: Date.now() });
       if (!store.set('groove.library', l)) {
         libStatus(
-          "Couldn't duplicate: this browser's storage is full or blocked. Export loops to keep them.",
+          "Couldn't duplicate: this browser's storage is full or blocked. Export grooves to keep them.",
         );
         return;
       }
@@ -121,7 +121,7 @@ function renderLib() {
     more.dataset.act = 'menu';
     more.setAttribute('aria-haspopup', 'true');
     more.setAttribute('aria-expanded', 'false');
-    more.setAttribute('aria-label', `More actions for ${it.state.name || 'Untitled loop'}`);
+    more.setAttribute('aria-label', `More actions for ${it.state.name || 'Untitled groove'}`);
     const menu = document.createElement('div');
     menu.className = 'barmenu';
     menu.setAttribute('role', 'menu');
@@ -167,12 +167,12 @@ $('titleSave').onclick = () => {
   delete copy.example;
   delete copy.libId;
   const i = S.libId ? l.findIndex((x) => x.id === S.libId) : -1;
-  let nm = S.name || 'Untitled loop',
+  let nm = S.name || 'Untitled groove',
     renamed = false,
     id = S.libId;
   if (i >= 0) l[i] = { id, state: copy, at: Date.now() };
   else {
-    const names = new Set(l.map((x) => x.state.name || 'Untitled loop')),
+    const names = new Set(l.map((x) => x.state.name || 'Untitled groove')),
       base = nm;
     let k = 2;
     while (names.has(nm)) nm = `${base} (${k++})`;
@@ -183,7 +183,7 @@ $('titleSave').onclick = () => {
   }
   if (!store.set('groove.library', l)) {
     appStatus(
-      "Couldn't save: this browser's storage is full or blocked. Use Export in Loops to keep a copy.",
+      "Couldn't save: this browser's storage is full or blocked. Use Export in Grooves to keep a copy.",
     );
     return;
   }
@@ -191,6 +191,7 @@ $('titleSave').onclick = () => {
   if (renamed) {
     S.name = nm;
     $('name').value = nm;
+    fitName();
   }
   persist();
   renderLib();
@@ -198,10 +199,10 @@ $('titleSave').onclick = () => {
   const b = $('titleSave'),
     msg =
       i >= 0
-        ? `Updated “${nm}” in Loops.`
+        ? `Updated “${nm}” in Grooves.`
         : renamed
-          ? `Saved to Loops as “${nm}” so it doesn't replace another loop.`
-          : `Saved “${nm}” to Loops.`;
+          ? `Saved to Grooves as “${nm}” so it doesn't replace another groove.`
+          : `Saved “${nm}” to Grooves.`;
   clearTimeout(b._t);
   b.innerHTML = ICON_OK;
   b.classList.add('ok');
@@ -236,14 +237,14 @@ $('libMore').onclick = (e) => {
   if (!m.hidden) m.querySelector('button')?.focus();
 };
 function newBlank() {
-  const prev = S.name || 'Untitled loop',
+  const prev = S.name || 'Untitled groove',
     had = S.bars.some((b) => INSTR.some((i) => b[i.id].some((v) => v)));
   commit();
   solo = null;
-  S = { name: 'Untitled loop', tempo: S.tempo, beats: 4, sub: 4, bars: [blankBar(16, 'Bar 1')] };
+  S = { name: 'Untitled groove', tempo: S.tempo, beats: 4, sub: 4, bars: [blankBar(16, 'Bar 1')] };
   persist();
   renderAll();
-  if (had) appStatus(`Started a new loop. Undo brings “${prev}” back.`, 'info');
+  if (had) appStatus(`Started a new groove. Undo brings “${prev}” back.`, 'info');
 }
 $('newLoop').onclick = () => {
   newBlank();

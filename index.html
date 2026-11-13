@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-    <meta name="description" content="Doodle your grooves: a drum-loop sketchpad for your phone." />
+    <meta name="description" content="Doodle your grooves: a drum sketchpad for your phone." />
     <title>Paradoodle</title>
-    <meta name="theme-color" content="#eef1f4" />
+    <meta name="theme-color" content="#11151b" />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
@@ -79,7 +79,7 @@
           </button>
         </span>
         <span class="hdrdiv" aria-hidden="true"></span>
-        <button class="btn iconbtn hdrsave" id="titleSave" type="button" aria-label="Save loop">
+        <button class="btn iconbtn hdrsave" id="titleSave" type="button" aria-label="Save groove">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
               <path d="M5 4h11.5L20 7.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
@@ -87,7 +87,7 @@
             </g>
           </svg>
         </button>
-        <button class="btn iconbtn hdrsave" id="libBtn" type="button" aria-label="Loops">
+        <button class="btn iconbtn hdrsave" id="libBtn" type="button" aria-label="Grooves">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <rect
               x="3.5"
@@ -145,7 +145,7 @@
           class="name"
           id="name"
           type="text"
-          aria-label="Loop name"
+          aria-label="Groove name"
           maxlength="60"
           spellcheck="false"
         />
@@ -353,12 +353,12 @@
     <div class="overlay" id="libOv" hidden>
       <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="libTitle">
         <div class="row">
-          <h3 id="libTitle">Loops</h3>
+          <h3 id="libTitle">Grooves</h3>
           <span class="spacer" style="flex: 1"></span
           ><button class="btn ghost" type="button" data-close>Close</button>
         </div>
         <div class="libbar">
-          <button class="btn" type="button" id="newLoop" aria-label="New blank loop">New</button>
+          <button class="btn" type="button" id="newLoop" aria-label="New blank groove">New</button>
           <label class="btn" for="importFile">Import</label>
           <span class="spacer"></span>
           <input type="file" id="importFile" accept=".json,application/json" hidden />
@@ -370,13 +370,13 @@
               data-act="menu"
               aria-haspopup="true"
               aria-expanded="false"
-              aria-label="More loop actions"
+              aria-label="More groove actions"
             >
               ⋯
             </button>
             <div class="barmenu" role="menu" hidden>
               <button class="btn ghost" type="button" role="menuitem" id="shareCurrent">
-                Share current loop
+                Share current groove
               </button>
               <button class="btn ghost" type="button" role="menuitem" id="exportLoops">
                 Export all
@@ -390,7 +390,7 @@
           <button class="btn" type="button" id="copyShare">Copy</button>
         </div>
         <div class="body">
-          <h4 class="libhead mine">My loops</h4>
+          <h4 class="libhead mine">My grooves</h4>
           <ul class="lib" id="libList"></ul>
           <details class="exgroup" id="exGroup">
             <summary class="libhead">Examples <span class="excount" id="exCount"></span></summary>
@@ -398,8 +398,8 @@
           </details>
         </div>
         <p class="hint">
-          Loops are kept in this browser on this device. Use Export to back them up or move them to
-          another device.
+          Grooves are kept in this browser on this device. Use Export to back them up or move them
+          to another device.
         </p>
       </div>
     </div>

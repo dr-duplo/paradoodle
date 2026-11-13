@@ -119,9 +119,8 @@ function stopPlayback() {
   } catch {}
   wake = null;
 }
-let flashOn = !!store.get('groove.flash');
-const dotsEl = $('beatdots'),
-  bgEls = [document.documentElement, document.body];
+let flashOn = store.get('groove.flash') !== false; // on until someone turns it off
+const dotsEl = $('beatdots');
 function renderDots(active) {
   if (dotsEl.children.length !== S.beats) dotsEl.innerHTML = '<i></i>'.repeat(S.beats);
   [...dotsEl.children].forEach((d, i) => {
@@ -129,19 +128,53 @@ function renderDots(active) {
     d.classList.toggle('down', i === 0);
   });
 }
+// The beat flash: the background lights up in the beat's colour with sine waves cut out of it
+// in the page colour. The waves are drawn once, as eight frames in one SVG stretched over the
+// window; each beat shows the next frame, so the pattern travels and repeats every eight beats.
+const WAVES = [
+  { y: 0.14, periods: 1.3, amp: 0.05, width: 20, speed: 0.9 },
+  { y: 0.33, periods: 3.2, amp: 0.025, width: 9, speed: -1.4 },
+  { y: 0.52, periods: 2.1, amp: 0.07, width: 30, speed: 0.6 },
+  { y: 0.72, periods: 4.6, amp: 0.02, width: 7, speed: -2.1 },
+  { y: 0.88, periods: 1.7, amp: 0.045, width: 16, speed: 1.2 },
+];
+const FLASH_FRAMES = 8;
+function wavePath(wave, phase) {
+  const steps = 120;
+  let d = '';
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps,
+      y = 1000 * (wave.y + wave.amp * Math.sin(2 * Math.PI * wave.periods * t + phase));
+    d += `${i ? 'L' : 'M'}${(1000 * t).toFixed(1)} ${y.toFixed(1)}`;
+  }
+  return d;
+}
+const flashEl = document.createElement('div');
+flashEl.className = 'beatflash';
+flashEl.setAttribute('aria-hidden', 'true');
+flashEl.innerHTML = `<svg viewBox="0 0 1000 1000" preserveAspectRatio="none"><rect width="1000" height="1000"/>${Array.from(
+  { length: FLASH_FRAMES },
+  (_, f) =>
+    `<g>${WAVES.map(
+      (wave, k) =>
+        `<path d="${wavePath(wave, f * wave.speed + k)}" stroke-width="${wave.width}" vector-effect="non-scaling-stroke"/>`,
+    ).join('')}</g>`,
+).join('')}</svg>`;
+document.body.prepend(flashEl);
+const flashFrames = [...flashEl.querySelectorAll('g')];
+let flashCount = 0;
 function flashBeat(beat) {
   const down = beat === 0;
   const cs = getComputedStyle(document.documentElement);
   const paper = cs.getPropertyValue('--paper').trim(),
     hue = cs.getPropertyValue(down ? '--brass' : '--accent').trim();
-  const from = `color-mix(in srgb, ${hue} ${down ? 75 : 45}%, ${paper})`;
-  const dur = Math.min(240, (60000 / S.tempo) * 0.6);
-  bgEls.forEach((el) => {
-    el.getAnimations().forEach((a) => a.cancel());
-    el.animate([{ backgroundColor: from }, { backgroundColor: paper }], {
-      duration: dur,
-      easing: 'ease-out',
-    });
+  flashEl.style.setProperty('--flash', `color-mix(in srgb, ${hue} ${down ? 75 : 45}%, ${paper})`);
+  const f = flashCount++ % FLASH_FRAMES;
+  flashFrames.forEach((g, i) => g.classList.toggle('on', i === f));
+  flashEl.getAnimations().forEach((a) => a.cancel());
+  flashEl.animate([{ opacity: 1 }, { opacity: 0 }], {
+    duration: Math.min(240, (60000 / S.tempo) * 0.6),
+    easing: 'ease-out',
   });
 }
 function setFlash(on) {

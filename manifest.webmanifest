@@ -1,7 +1,7 @@
 {
   "name": "Paradoodle",
   "short_name": "Paradoodle",
-  "description": "Doodle your grooves: a drum-loop sketchpad for your phone.",
+  "description": "Doodle your grooves: a drum sketchpad for your phone.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -82,7 +82,7 @@ async function renderSheet(style) {
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = INK;
   ctx.font = `700 64px ${FD}`;
-  ctx.fillText(S.name || 'Untitled loop', M, M + 50);
+  ctx.fillText(S.name || 'Untitled groove', M, M + 50);
   ctx.font = `500 24px ${FM}`;
   ctx.fillStyle = MUTED;
   const feel = { 2: '8th notes', 3: '8th-note triplets', 4: '16th notes' }[S.sub];
@@ -215,12 +215,12 @@ async function renderSheet(style) {
   return cv;
 }
 const slug = () =>
-  (S.name || 'drum-loop')
+  (S.name || 'drum-groove')
     .normalize('NFKD')
     .replace(/[^\w\s-]/g, '')
     .trim()
     .replace(/\s+/g, '-')
-    .toLowerCase() || 'drum-loop';
+    .toLowerCase() || 'drum-groove';
 let sheetCanvas = null,
   downloads = null;
 const browserDownloads = {
@@ -316,7 +316,11 @@ function pdfBlob() {
     undefined,
     'FAST',
   );
-  pdf.setProperties({ title: S.name || 'Drum loop', subject: 'Drum sheet', creator: 'Paradoodle' });
+  pdf.setProperties({
+    title: S.name || 'Drum groove',
+    subject: 'Drum sheet',
+    creator: 'Paradoodle',
+  });
   return pdf.output('blob');
 }
 async function save(kind) {

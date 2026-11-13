@@ -4,12 +4,12 @@
 const FILE_TAG = 'groove-sketchpad-loops';
 
 const fileSlug = (name) =>
-  (name || 'drum-loop')
+  (name || 'drum-groove')
     .normalize('NFKD')
     .replace(/[^\w\s-]/g, '')
     .trim()
     .replace(/\s+/g, '-')
-    .toLowerCase() || 'drum-loop';
+    .toLowerCase() || 'drum-groove';
 async function exportLoopFile(loops, filename) {
   const text = JSON.stringify(
     { app: FILE_TAG, version: 1, exported: new Date().toISOString(), loops },
@@ -17,7 +17,7 @@ async function exportLoopFile(loops, filename) {
     1,
   );
   const what =
-    loops.length === 1 ? `“${loops[0].name || 'Untitled loop'}”` : `${loops.length} loops`;
+    loops.length === 1 ? `“${loops[0].name || 'Untitled groove'}”` : `${loops.length} grooves`;
   await Promise.race([dlReady, new Promise((r) => setTimeout(r, 1500))]);
   if (downloads) {
     try {
@@ -50,21 +50,21 @@ $('exportLoops').onclick = () => {
     exportOne(S);
     return;
   }
-  exportLoopFile(items, 'groove-loops.json');
+  exportLoopFile(items, 'paradoodle-grooves.json');
 };
 $('importFile').onchange = async (e) => {
   const file = e.target.files?.[0];
   e.target.value = '';
   if (!file) return;
   if (file.size > 2e6) {
-    libStatus(`${file.name} is too large to be a loop file (limit 2 MB).`);
+    libStatus(`${file.name} is too large to be a groove file (limit 2 MB).`);
     return;
   }
   let data;
   try {
     data = JSON.parse(await file.text());
   } catch {
-    libStatus(`${file.name} isn't a loop file. Choose a .json file exported from Paradoodle.`);
+    libStatus(`${file.name} isn't a groove file. Choose a .json file exported from Paradoodle.`);
     return;
   }
   const all = Array.isArray(data) ? data : Array.isArray(data?.loops) ? data.loops : [data];
@@ -79,13 +79,13 @@ $('importFile').onchange = async (e) => {
     })
     .filter(Boolean);
   if (!loops.length) {
-    libStatus(`No loops found in ${file.name}.`);
+    libStatus(`No grooves found in ${file.name}.`);
     return;
   }
   const l = lib(),
-    names = new Set(l.map((x) => x.state.name || 'Untitled loop'));
+    names = new Set(l.map((x) => x.state.name || 'Untitled groove'));
   loops.forEach((st) => {
-    const base = st.name || 'Untitled loop';
+    const base = st.name || 'Untitled groove';
     let nm = base,
       k = 2;
     while (names.has(nm)) nm = `${base} (${k++})`;
@@ -100,6 +100,6 @@ $('importFile').onchange = async (e) => {
   renderLib();
   const skipped = all.length - loops.length;
   libStatus(
-    `Imported ${loops.length} loop${loops.length > 1 ? 's' : ''}${skipped ? `, skipped ${skipped} that couldn't be read` : ''}. Tap Open to load one.`,
+    `Imported ${loops.length} groove${loops.length > 1 ? 's' : ''}${skipped ? `, skipped ${skipped} that couldn't be read` : ''}. Tap Open to load one.`,
   );
 };

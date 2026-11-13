@@ -5,7 +5,7 @@
 // ---------- share links ----------
 // The viewer passes only a plain #name (letters, digits, hyphens) from the link to the page,
 // so a loop is bit-packed and written in base32 (0-9a-v). Keep INSTR order and arts stable:
-// old links decode against it.
+// links already shared decode against it.
 const SHARE_BASE = location.href.split('#')[0];
 // Every code starts with this tag, so a loop can be found inside any text or URL.
 const LINK_TAG = 'paradoodle-';
@@ -14,6 +14,21 @@ const loopHash = (st) => '#' + LINK_TAG + packLoop(st);
 const WHO_CAN_OPEN = 'Anyone with the link can open it.';
 const B32 = '0123456789abcdefghijklmnopqrstuv';
 const artBits = (ins) => Math.ceil(Math.log2(ins.arts.length + 1));
+// CRC-10 (polynomial 0x233) over the code's characters, written as two more characters.
+// It catches any damage within two neighbouring characters (a typo, two swapped characters)
+// and all but about 1 in 1000 other changes, such as a link that was cut off.
+function crc10(code) {
+  let reg = 0;
+  for (const ch of code) {
+    const v = B32.indexOf(ch);
+    for (let j = 4; j >= 0; j--) {
+      const top = ((reg >> 9) & 1) ^ ((v >> j) & 1);
+      reg = (reg << 1) & 0x3ff;
+      if (top) reg ^= 0x233;
+    }
+  }
+  return B32[reg >> 5] + B32[reg & 31];
+}
 function packLoop(st) {
   const bits = [];
   const put = (v, n) => {
@@ -29,7 +44,7 @@ function packLoop(st) {
     put(b.length, 8);
     b.forEach((x) => put(x, 8));
   };
-  put(2, 4);
+  put(3, 4);
   put(st.beats - 2, 3);
   put({ 2: 0, 3: 1, 4: 2 }[st.sub], 2);
   put(st.tempo - 40, 8);
@@ -61,10 +76,14 @@ function packLoop(st) {
     for (let j = 0; j < 5; j++) v = (v << 1) | (bits[i + j] || 0);
     out += B32[v];
   }
-  return out;
+  return out + crc10(out);
 }
 function unpackLoop(code) {
   if (!/^[0-9a-v]{8,8000}$/.test(code)) return null;
+  // every code ends in its checksum; a code that fails it was mistyped or cut off
+  const body = code.slice(0, -2);
+  if (crc10(body) !== code.slice(-2)) return null;
+  code = body;
   const bits = [];
   for (const ch of code) {
     const v = B32.indexOf(ch);
@@ -85,7 +104,7 @@ function unpackLoop(code) {
     return dec.decode(b);
   };
   const ver = get(4);
-  if (ver !== 1 && ver !== 2) return null;
+  if (ver !== 3) return null;
   const beats = get(3) + 2,
     sub = [2, 3, 4][get(2)],
     tempo = get(8) + 40,
@@ -98,7 +117,7 @@ function unpackLoop(code) {
     bars = [];
   for (let i = 0; i < nb; i++) {
     const bar = { name: get(1) ? `Bar ${i + 1}` : getStr() };
-    const umask = ver === 1 ? (1 << INSTR.length) - 1 : get(INSTR.length);
+    const umask = get(INSTR.length);
     INSTR.forEach((ins, r) => {
       const w = artBits(ins);
       bar[ins.id] = Array.from({ length: n }, () => (umask & (1 << r) ? get(w) : 0));
@@ -115,7 +134,7 @@ function unpackLoop(code) {
       hidden: INSTR.filter((_, i) => hmask & (1 << i)).map((i) => i.id),
       bars,
     },
-    'Shared loop',
+    'Shared groove',
   );
 }
 function shareLoop(st) {
@@ -128,7 +147,7 @@ function shareLoop(st) {
   try {
     history.replaceState(null, '', hash);
   } catch {}
-  const nm = st.name || 'Untitled loop';
+  const nm = st.name || 'Untitled groove';
   const done = (ok) =>
     libStatus(
       ok
@@ -160,12 +179,25 @@ $('nameShare').onclick = (e) => {
   e.currentTarget.setAttribute('aria-expanded', !m.hidden);
   if (!m.hidden) m.querySelector('button')?.focus();
 };
+// The tick on the share button and the status line after a link was copied.
+function showLinkCopied(nm) {
+  const btn = $('nameShare'),
+    msg = `Link to “${nm}” copied. ${WHO_CAN_OPEN}`;
+  btn.innerHTML = ICON_OK;
+  btn.classList.add('ok');
+  appStatus(msg, 'info');
+  clearTimeout(nameShareT);
+  nameShareT = setTimeout(() => {
+    btn.innerHTML = ICON_LINK;
+    btn.classList.remove('ok');
+    if ($('appStatus').textContent === msg) appStatus('');
+  }, 2500);
+}
 $('shareCopy').onclick = () => {
   closeMenus();
-  const btn = $('nameShare'),
-    hash = loopHash(S),
+  const hash = loopHash(S),
     url = SHARE_BASE + hash,
-    nm = S.name || 'Untitled loop';
+    nm = S.name || 'Untitled groove';
   try {
     history.replaceState(null, '', hash);
   } catch {}
@@ -173,24 +205,25 @@ $('shareCopy').onclick = () => {
     $('libBtn').click();
     shareLoop(S);
   };
-  const ok = () => {
-    btn.innerHTML = ICON_OK;
-    btn.classList.add('ok');
-    const msg = `Link to “${nm}” copied. ${WHO_CAN_OPEN}`;
-    appStatus(msg, 'info');
-    clearTimeout(nameShareT);
-    nameShareT = setTimeout(() => {
-      btn.innerHTML = ICON_LINK;
-      btn.classList.remove('ok');
-      if ($('appStatus').textContent === msg) appStatus('');
-    }, 2500);
-  };
   try {
-    navigator.clipboard.writeText(url).then(ok, fallback);
+    navigator.clipboard.writeText(url).then(() => showLinkCopied(nm), fallback);
   } catch {
     fallback();
   }
 };
+// Copying (⌘C / Ctrl+C) with nothing selected and outside a text field copies the groove's link,
+// just like Copy link in the share menu. Selected text still copies as usual.
+document.addEventListener('copy', (e) => {
+  if (!e.clipboardData || e.target.closest?.('input, textarea, [contenteditable]')) return;
+  if (String(getSelection() || '')) return;
+  const hash = loopHash(S);
+  e.clipboardData.setData('text/plain', SHARE_BASE + hash);
+  e.preventDefault();
+  try {
+    history.replaceState(null, '', hash);
+  } catch {}
+  showLinkCopied(S.name || 'Untitled groove');
+});
 $('copyShare').onclick = () => {
   const inp = $('shareUrl');
   try {
@@ -216,7 +249,7 @@ function openFromLink() {
     st = null;
   }
   if (!st) {
-    appStatus("This share link is damaged or incomplete, so the loop couldn't be opened.");
+    appStatus("This share link is damaged or incomplete, so the groove couldn't be opened.");
     try {
       history.replaceState(null, '', location.pathname + location.search);
     } catch {}
@@ -230,7 +263,7 @@ function openFromLink() {
   commit();
   loadGroove(st);
   appStatus(
-    `Opened the shared loop “${st.name}”. Undo goes back to your previous draft; Save keeps it.`,
+    `Opened the shared groove “${st.name}”. Undo goes back to your previous draft; Save keeps it.`,
     'info',
   );
 }
