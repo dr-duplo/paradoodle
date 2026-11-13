@@ -158,7 +158,7 @@ function syncUrl() {
   clearTimeout(urlT);
   urlT = setTimeout(() => {
     try {
-      const h = '#loop-' + packLoop(S);
+      const h = loopHash(S);
       if (location.hash !== h) history.replaceState(null, '', h);
     } catch {}
   }, 400);

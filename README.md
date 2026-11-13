@@ -22,7 +22,7 @@ A _paradiddle_ is one of the first rudiments every drummer learns: right, left, 
 
 **Keep.** Save loops to your library, undo and redo as much as you like (⌘Z / Ctrl+Z, ⇧⌘Z / Ctrl+Y), and back everything up as a JSON file.
 
-**Share.** Every loop fits into a link. Send it to your bandmate and they open exactly what you wrote. When the app runs as its own page, the address follows along as you edit, so a bookmark or a copied address always holds the current groove.
+**Share.** Every loop fits into a link. Send it to your bandmate and they open exactly what you wrote, or paste one into the app to open it. When the app runs as its own page, the address follows along as you edit, so a bookmark or a copied address always holds the current groove.
 
 **Print.** Export a drum sheet with staff notation, the grid, or both, as a PNG or an A4 PDF.
 
@@ -77,7 +77,7 @@ Every pull request runs the same checks plus `npm audit` (`.github/workflows/ci.
 
 ## How share links work
 
-A loop is packed bit by bit and written in base32 (`0-9a-v`) after `#loop-`. A two-bar groove usually comes out at 50 to 120 characters.
+A loop is packed bit by bit and written in base32 (`0-9a-v`) after `#paradoodle-`. A two-bar groove usually comes out at 50 to 120 characters. The `paradoodle-` tag marks the start of a loop, so the app finds one in any text: paste a link, or a whole chat message containing it, anywhere outside a text field and the loop opens.
 
 | Field                        | Bits                                                                                   |
 | ---------------------------- | -------------------------------------------------------------------------------------- |
