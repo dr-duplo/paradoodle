@@ -17,15 +17,24 @@ function updateThemeBtn() {
   b.innerHTML = dark ? ICON_SUN : ICON_MOON;
   b.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
 }
+// The browser bar (and the installed app's title bar) takes the page's background colour.
+function syncThemeColor() {
+  const paper = getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', paper);
+}
 function applyTheme(t) {
   if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
   else delete document.documentElement.dataset.theme;
   updateThemeBtn();
+  syncThemeColor();
 }
 $('themeBtn').onclick = () => {
   const t = isDark() ? 'light' : 'dark';
   store.set(THEME_KEY, t);
   applyTheme(t);
 };
-systemDark.addEventListener('change', updateThemeBtn);
+systemDark.addEventListener('change', () => {
+  updateThemeBtn();
+  syncThemeColor();
+});
 applyTheme(store.get(THEME_KEY));

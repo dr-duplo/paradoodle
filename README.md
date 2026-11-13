@@ -30,6 +30,12 @@ The moon button next to the playback toggles switches between a dark and a light
 
 To get you started, the app opens with the **Kraut Break**, a two-bar groove full of ghost notes. You'll find it again under Loops → Examples.
 
+## Install it
+
+Paradoodle is an installable web app. In Chrome or Edge, use **Install** in the address bar or the menu; on Android, **Add to Home screen**; on an iPhone or iPad, open it in Safari, tap **Share** and then **Add to Home Screen**. It then opens in its own window, without the browser around it, and works offline: sketching and playback always, exporting once you have exported a sheet with a connection.
+
+On iPhone and iPad, the installed app keeps its own storage, separate from Safari. To bring loops over, send yourself a share link or use Export and Import in the Loops panel.
+
 ## Run it
 
 Open `index.html` in a browser. That's it: the source runs as is, without a build step.
@@ -40,25 +46,27 @@ The notation library (VexFlow) and the PDF library (jsPDF) load from public CDNs
 
 There is no framework and no bundler during development. `index.html` holds the markup, `styles.css` the look, and `js/` the behaviour, split into plain scripts that load in order and share one global scope. Each file starts with a short note on what it does.
 
-| File                 | What it does                                                                                     |
-| -------------------- | ------------------------------------------------------------------------------------------------ |
-| `js/basics.js`       | The drum kit, the note symbols, small helpers (`$`, `esc`, `store`) and the pinned CDN libraries |
-| `js/theme.js`        | The light and dark theme and the moon/sun button                                                 |
-| `js/state.js`        | The loop being edited (`S`), checking and repairing loops, undo history, the unsaved-changes dot |
-| `js/render.js`       | Draws the summary line, kit chips and every bar's grid                                           |
-| `js/editing.js`      | Tapping cells and everything else you can change about a loop                                    |
-| `js/mute.js`         | Muting kit rows while listening (tap or double-tap an instrument name)                           |
-| `js/audio.js`        | The synthesised drum kit and the spoken count                                                    |
-| `js/playback.js`     | Play and stop, the scheduler, playhead, click and beat flash                                     |
-| `js/notation.js`     | Staff notation with VexFlow                                                                      |
-| `js/export-sheet.js` | The printable sheet as PNG or PDF                                                                |
-| `js/examples.js`     | Built-in example grooves                                                                         |
-| `js/library.js`      | Saved loops and the Loops panel                                                                  |
-| `js/loop-files.js`   | Exporting and importing loops as JSON                                                            |
-| `js/share-links.js`  | Packing a loop into a link and opening links                                                     |
-| `js/tooltips.js`     | Hover tips on buttons                                                                            |
-| `js/main.js`         | Starts the app                                                                                   |
-| `js/count-sounds.js` | The spoken count as base64 WAV data                                                              |
+| File                             | What it does                                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `js/basics.js`                   | The drum kit, the note symbols, small helpers (`$`, `esc`, `store`) and the pinned CDN libraries |
+| `js/theme.js`                    | The light and dark theme and the moon/sun button                                                 |
+| `js/state.js`                    | The loop being edited (`S`), checking and repairing loops, undo history, the unsaved-changes dot |
+| `js/render.js`                   | Draws the summary line, kit chips and every bar's grid                                           |
+| `js/editing.js`                  | Tapping cells and everything else you can change about a loop                                    |
+| `js/mute.js`                     | Muting kit rows while listening (tap or double-tap an instrument name)                           |
+| `js/audio.js`                    | The synthesised drum kit and the spoken count                                                    |
+| `js/playback.js`                 | Play and stop, the scheduler, playhead, click and beat flash                                     |
+| `js/notation.js`                 | Staff notation with VexFlow                                                                      |
+| `js/export-sheet.js`             | The printable sheet as PNG or PDF                                                                |
+| `js/examples.js`                 | Built-in example grooves                                                                         |
+| `js/library.js`                  | Saved loops and the Loops panel                                                                  |
+| `js/loop-files.js`               | Exporting and importing loops as JSON                                                            |
+| `js/share-links.js`              | Packing a loop into a link and opening links                                                     |
+| `js/tooltips.js`                 | Hover tips on buttons                                                                            |
+| `js/main.js`                     | Starts the app                                                                                   |
+| `sw.js`                          | The service worker that keeps the app and its libraries for offline use                          |
+| `manifest.webmanifest`, `icons/` | The app's name, colours and icons for installing                                                 |
+| `js/count-sounds.js`             | The spoken count as base64 WAV data                                                              |
 
 ## Development
 

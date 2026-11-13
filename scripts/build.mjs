@@ -1,6 +1,6 @@
 // Builds dist/index.html: one minified file with the styles and all scripts inlined.
 // The script order is taken from the <script src="js/..."> tags in index.html.
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, cp } from 'node:fs/promises';
 import { transform } from 'esbuild';
 import { createHash } from 'node:crypto';
 
@@ -45,7 +45,9 @@ const csp = [
   `script-src 'sha256-${scriptHash}' ${libs.join(' ')}`,
   "style-src 'unsafe-inline' https://fonts.googleapis.com",
   'font-src https://fonts.gstatic.com data:',
-  'img-src data: blob:',
+  "img-src 'self' data: blob:",
+  "manifest-src 'self'",
+  "worker-src 'self'",
   "base-uri 'none'",
   "form-action 'none'",
 ].join('; ');
@@ -58,4 +60,16 @@ page = page.replace(
 
 await mkdir('dist', { recursive: true });
 await writeFile('dist/index.html', page + '\n');
+
+// Installable app: the manifest, the icons and the service worker. The worker's VERSION is the
+// page's hash, so every deploy replaces the offline copy of the app.
+const version = createHash('sha256').update(page).digest('hex').slice(0, 12);
+const sw = await readFile('sw.js', 'utf8');
+if (!sw.includes("const VERSION = 'dev';")) throw new Error('sw.js: VERSION placeholder missing');
+await writeFile(
+  'dist/sw.js',
+  sw.replace("const VERSION = 'dev';", `const VERSION = '${version}';`),
+);
+await cp('manifest.webmanifest', 'dist/manifest.webmanifest');
+await cp('icons', 'dist/icons', { recursive: true });
 console.log(`dist/index.html: ${(page.length / 1024).toFixed(0)} KB from ${files.length} scripts`);
