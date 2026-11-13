@@ -926,6 +926,10 @@ select {
   color: var(--muted);
   margin: 8px 0 0;
 }
+.hint.about a {
+  color: var(--accent);
+  font-weight: 600;
+}
 .status {
   font-size: 13px;
   color: var(--muted);
