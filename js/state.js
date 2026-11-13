@@ -35,7 +35,14 @@ function kraut() {
       });
       return b;
     });
-  return { name: 'Kraut Break', tempo: 136, beats: 4, sub: 4, hidden: ['ride', 'hhf'], bars };
+  return {
+    name: 'Kraut Break',
+    tempo: 136,
+    beats: 4,
+    sub: 4,
+    hidden: ['ride', 'tom', 'hhf'],
+    bars,
+  };
 }
 function example() {
   return Object.assign(kraut(), { example: true });
