@@ -43,11 +43,17 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-async function fromNetworkFirst(req) {
+// only the app's own page is the offline shell; other navigations (an image, a file) are not
+const SCOPE_PATH = new URL('./', self.registration.scope).pathname;
+const isAppPage = (url) =>
+  url.pathname === SCOPE_PATH || url.pathname === SCOPE_PATH + 'index.html';
+
+async function fromNetworkFirst(req, url) {
   const cache = await caches.open(APP_CACHE);
   try {
     const res = await fetch(req);
-    if (res.ok) cache.put('./', res.clone());
+    if (res.ok && isAppPage(url) && (res.headers.get('content-type') || '').startsWith('text/html'))
+      cache.put('./', res.clone());
     return res;
   } catch {
     return (await cache.match('./')) || Response.error();
@@ -68,7 +74,7 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (req.mode === 'navigate' && url.origin === location.origin) {
-    e.respondWith(fromNetworkFirst(req));
+    e.respondWith(fromNetworkFirst(req, url));
   } else if (url.origin === location.origin) {
     e.respondWith(fromCacheFirst(req, APP_CACHE));
   } else if (LIB_HOSTS.includes(url.hostname)) {

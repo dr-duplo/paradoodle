@@ -125,8 +125,9 @@ function buildStaffVoice(VF, bar, ids, dir) {
   });
   return { notes, tuplets, beams };
 }
-// draws all bars as staff systems; (x, y) top-left, width in drawing units; returns height used
-function drawStaff(VF, ctx2d, x0, y0, width) {
+// draws all bars as staff systems; (x, y) top-left, width in drawing units; returns height used.
+// ys: optional y offset per system (default: STAFF_ROW apart); only: draw just that system
+function drawStaff(VF, ctx2d, x0, y0, width, { ys, only } = {}) {
   const vctx = new VF.CanvasContext(ctx2d);
   vctx.setFillStyle('#111');
   vctx.setStrokeStyle('#111');
@@ -134,11 +135,12 @@ function drawStaff(VF, ctx2d, x0, y0, width) {
   S.bars.forEach((bar, idx) => {
     const L = Math.floor(idx / lay.perLine),
       k = idx % lay.perLine;
+    if (only !== undefined && L !== only) return;
     const lead = STAFF_CLEF + (L === 0 ? STAFF_TIME : 0);
     const bw = (width - lead) / lay.perLine;
     const x = x0 + (k === 0 ? 0 : lead + k * bw),
       w = k === 0 ? lead + bw : bw;
-    const st = new VF.Stave(x, y0 + L * STAFF_ROW, w);
+    const st = new VF.Stave(x, y0 + (ys ? ys[L] : L * STAFF_ROW), w);
     if (k === 0) {
       st.addClef('percussion');
       if (L === 0) st.addTimeSignature(`${S.beats}/4`);

@@ -9,7 +9,7 @@
 const SHARE_BASE = location.href.split('#')[0];
 // Every code starts with this tag, so a loop can be found inside any text or URL.
 const LINK_TAG = 'paradoodle-';
-const LINK_IN_TEXT = /paradoodle-([0-9a-v]+)/;
+const LINK_IN_TEXT = /paradoodle-([0-9a-v]+)/gi;
 const loopHash = (st) => '#' + LINK_TAG + packLoop(st);
 const WHO_CAN_OPEN = 'Anyone with the link can open it.';
 const B32 = '0123456789abcdefghijklmnopqrstuv';
@@ -346,8 +346,17 @@ addEventListener('hashchange', openFromLink);
 document.addEventListener('paste', (e) => {
   const t = e.target;
   if (t.closest?.('input, textarea, [contenteditable]')) return;
-  const m = LINK_IN_TEXT.exec(e.clipboardData?.getData('text') || '');
-  if (!m) return;
+  // a text can hold other "paradoodle-" words (e.g. "paradoodle-app"): use the first code that decodes
+  const code = [...(e.clipboardData?.getData('text') || '').matchAll(LINK_IN_TEXT)]
+    .map((m) => m[1].toLowerCase())
+    .find((c) => {
+      try {
+        return !!unpackLoop(c);
+      } catch {
+        return false;
+      }
+    });
+  if (!code) return;
   e.preventDefault();
-  location.hash = LINK_TAG + m[1];
+  location.hash = LINK_TAG + code;
 });

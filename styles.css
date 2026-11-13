@@ -111,6 +111,10 @@ body {
   display: inline;
 }
 body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
   color: var(--ink);
   font-family: var(--body);
   font-size: 15px;
@@ -121,12 +125,14 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 .wrap {
+  width: 100%;
   max-width: 860px;
   margin: 0 auto;
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding-bottom: 120px;
+  padding-bottom: 20px;
 }
 button,
 select,
@@ -143,6 +149,7 @@ button {
 }
 
 header.top {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -189,6 +196,7 @@ header.top {
   padding: 2px 0;
   border-bottom: 2px solid transparent;
   min-width: 0;
+  text-overflow: ellipsis;
 }
 .name:focus {
   outline: none;
@@ -222,12 +230,13 @@ header.top > .brand {
   background: var(--line-strong);
 }
 .hdracts {
-  position: relative;
   display: flex;
   align-self: stretch;
 }
+/* anchored to the header row, not the button: a wrapped header can't push the menu off-screen */
 .hdracts .barmenu {
   top: calc(100% + 4px);
+  max-width: calc(100vw - 32px);
 }
 .iconbtn.hdrsave {
   width: 42px;
@@ -276,7 +285,7 @@ header.top > .brand {
   height: 9px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 0 2px var(--bg);
+  box-shadow: 0 0 0 2px var(--surface);
 }
 .btn {
   border: 1px solid var(--line-strong);
@@ -654,6 +663,7 @@ select {
   background: transparent;
   padding: 2px 0;
   color: var(--ink);
+  text-overflow: ellipsis;
 }
 .barname:hover {
   border-bottom-color: var(--line-strong);
@@ -680,6 +690,15 @@ select {
 .scroller {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  /* edge shadows show only while more grid lies that way; the local covers hide them at the ends */
+  --edge: color-mix(in srgb, var(--ink) 24%, transparent);
+  background:
+    linear-gradient(to right, var(--surface) 30%, transparent) left center / 28px 100% no-repeat
+      local,
+    linear-gradient(to left, var(--surface) 30%, transparent) right center / 28px 100% no-repeat
+      local,
+    linear-gradient(to right, var(--edge), transparent) left center / 12px 100% no-repeat scroll,
+    linear-gradient(to left, var(--edge), transparent) right center / 12px 100% no-repeat scroll;
 }
 .grid {
   display: grid;
@@ -816,11 +835,13 @@ button.lbl.cym {
   display: none;
 }
 
+/* sticky inside the body's flex column: the page always ends above it, whatever height it wraps to */
 .transport {
-  position: fixed;
-  left: 0;
-  right: 0;
+  position: sticky;
   bottom: 0;
+  flex: none;
+  margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)))
+    calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
   z-index: 5;
   background: var(--surface);
   border-top: 1px solid var(--line);
@@ -1332,7 +1353,7 @@ button.lbl.cym {
     flex-wrap: wrap;
     align-items: center;
     gap: 8px 12px;
-    padding-bottom: 72px;
+    padding-bottom: 12px;
   }
   .wrap > * {
     flex: 0 0 100%;

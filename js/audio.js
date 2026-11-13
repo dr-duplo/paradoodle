@@ -4,7 +4,8 @@
 let audio = null,
   master = null,
   noiseBuf = null,
-  openHat = null;
+  openHat = null,
+  bus = null; // per-run gain that Stop fades out, so notes already scheduled go silent
 function ensureAudio() {
   if (!audio) {
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -25,6 +26,7 @@ function ensureAudio() {
     master = audio.createGain();
     master.gain.value = 0.8;
     master.connect(comp).connect(audio.destination);
+    audio.onstatechange = onAudioState;
     noiseBuf = audio.createBuffer(1, audio.sampleRate, audio.sampleRate);
     const d = noiseBuf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
@@ -49,7 +51,7 @@ function env(t, peak, dur) {
   const g = audio.createGain();
   g.gain.setValueAtTime(Math.max(peak, 0.0002), t);
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  g.connect(master);
+  g.connect(bus || master);
   return g;
 }
 function noise(t, dur, vel, filters) {
@@ -77,9 +79,15 @@ function tone(t, type, f0, f1, dur, vel, sweep = 0.6) {
 }
 function chokeHat(t) {
   if (!openHat) return;
-  const p = openHat.gain;
+  const { g, t0, peak, dur } = openHat,
+    p = g.gain;
   if (p.cancelAndHoldAtTime) p.cancelAndHoldAtTime(t);
-  else p.cancelScheduledValues(t);
+  else {
+    // no hold support (Firefox): pin the gain to where the open hat's decay has got to
+    const v = peak * Math.pow(0.0001 / peak, Math.min(1, Math.max(0, (t - t0) / dur)));
+    p.cancelScheduledValues(t);
+    p.setValueAtTime(v, t);
+  }
   p.setTargetAtTime(0.0001, t, 0.01);
   openHat = null;
 }
@@ -109,7 +117,7 @@ function triggerSound(id, art, t) {
       filt('highpass', 7200),
       filt('peaking', 10000, 1),
     ]);
-    if (open) openHat = g;
+    if (open) openHat = { g, t0: t, peak: Math.max(v * 0.42, 0.0002), dur: 0.42 };
   } else if (id === 'hhf') {
     chokeHat(t);
     noise(t, 0.045, v * 0.38, [filt('bandpass', 5200, 1.4)]);
@@ -143,6 +151,20 @@ function triggerSound(id, art, t) {
     });
     tone(t, 'sine', 2400, 2400, 0.5, v * 0.11);
   }
+}
+// everything scheduled during one playback run goes through its own bus
+function openBus() {
+  bus = audio.createGain();
+  bus.connect(master);
+}
+function closeBus() {
+  const b = bus;
+  bus = null;
+  openHat = null;
+  if (!b) return;
+  b.gain.cancelScheduledValues(0);
+  b.gain.setTargetAtTime(0, audio.currentTime, 0.008);
+  setTimeout(() => b.disconnect(), 150);
 }
 function metronome(t, accent) {
   tone(t, 'sine', accent ? 1600 : 1100, accent ? 1600 : 1100, 0.04, 0.35);
@@ -178,7 +200,7 @@ function sayWord(w, t, slot, vel) {
   g.gain.setValueAtTime(vel, t);
   g.gain.setValueAtTime(vel, Math.max(t, end - 0.015));
   g.gain.linearRampToValueAtTime(0, end);
-  src.connect(g).connect(master);
+  src.connect(g).connect(bus || master);
   src.start(t);
   src.stop(end + 0.01);
 }

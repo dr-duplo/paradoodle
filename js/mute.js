@@ -20,9 +20,7 @@ function toggleMute(id) {
 }
 // Hear only `id`; if that is already the case, unmute everything.
 function soloRow(id) {
-  const others = visibleRows()
-    .map((ins) => ins.id)
-    .filter((x) => x !== id);
+  const others = INSTR.map((ins) => ins.id).filter((x) => x !== id);
   const alone = !isMuted(id) && others.every(isMuted);
   muted.clear();
   if (!alone) others.forEach((x) => muted.add(x));

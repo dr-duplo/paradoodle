@@ -9,6 +9,8 @@ const blankBar = (n, name) =>
   );
 const barName = (bar, i) =>
   bar && typeof bar.name === 'string' && bar.name.trim() ? bar.name : `Bar ${i + 1}`;
+// cut on code points so an emoji is never split
+const clip = (s, n) => Array.from(s).slice(0, n).join('');
 const DEFAULT_NAME = /^Bar (\d+)$/;
 function nextBarName() {
   const used = S.bars.map((b) => +(DEFAULT_NAME.exec(b.name || '') || [])[1] || 0);
@@ -55,7 +57,7 @@ function normalize(st) {
   const n = st.beats * st.sub;
   st.bars = st.bars.map((bar, i) => {
     const src = bar && typeof bar === 'object' ? bar : {};
-    const out = { name: barName(src, i).slice(0, 40) };
+    const out = { name: clip(barName(src, i), 40) };
     INSTR.forEach((ins) => {
       const old = Array.isArray(src[ins.id]) ? src[ins.id] : [];
       out[ins.id] = Array.from({ length: n }, (_, k) => {
@@ -103,6 +105,7 @@ function renderChips() {
       if (on) {
         if (INSTR.length - h.size <= 1) return;
         h.add(ins.id);
+        muted.delete(ins.id); // a hidden row has no label left to unmute it
       } else h.delete(ins.id);
       S.hidden = [...h];
       rowsChanged();
@@ -116,21 +119,29 @@ function rowsChanged() {
   renderLegend();
   renderBars();
 }
+// hide rows without notes, but always leave one row visible
+function hideEmptyRows() {
+  const h = new Set(S.hidden || []),
+    n = h.size;
+  INSTR.forEach((i) => {
+    if (!rowCount(i.id) && !h.has(i.id) && INSTR.length - h.size > 1) h.add(i.id);
+  });
+  if (h.size === n) return false;
+  S.hidden = [...h];
+  return true;
+}
 // opening a groove: hide rows that have no notes, keep rows the loop already hid
 function loadGroove(st) {
   solo = null;
   S = normalize(st);
   S.example = false;
-  const empty = INSTR.filter((i) => !rowCount(i.id)).map((i) => i.id);
-  if (empty.length < INSTR.length) S.hidden = [...new Set([...(S.hidden || []), ...empty])];
+  hideEmptyRows();
+  cleanBase = canonLoop(S);
   persist();
   renderAll();
 }
 $('hideEmpty').onclick = () => {
-  const empty = INSTR.filter((i) => !rowCount(i.id)).map((i) => i.id);
-  if (empty.length >= INSTR.length) return;
-  S.hidden = [...new Set([...(S.hidden || []), ...empty])];
-  rowsChanged();
+  if (hideEmptyRows()) rowsChanged();
 };
 let S = null;
 try {
@@ -149,8 +160,15 @@ function syncHist() {
   $('undo').disabled = !hist.length;
   $('redo').disabled = !fut.length;
 }
+// libId is identity, not content: Save back-fills it into this groove's snapshots (by gid)
+function snap() {
+  S.gid ||= newId();
+  return JSON.stringify(Object.assign({}, S, { _solo: solo }));
+}
+let burst = null; // the control whose burst of input events is still one undo step
 function commit() {
-  hist.push(JSON.stringify(S));
+  burst = null;
+  hist.push(snap());
   if (hist.length > 80) hist.shift();
   fut.length = 0;
   syncHist();
@@ -176,21 +194,28 @@ function syncUrl() {
     } catch {}
   }, 400);
 }
+// Rows without notes don't count as hidden, so auto-hiding them on open isn't a change.
 const canonLoop = (st) => {
   try {
     const c = cleanLoop(JSON.parse(JSON.stringify(st)), 'Untitled groove');
     if (!c) return '';
     delete c.example;
     delete c.libId;
+    if (c.hidden)
+      c.hidden = c.hidden.filter((id) => c.bars.some((b) => b[id].some(Boolean))).sort();
+    if (!c.hidden?.length) delete c.hidden;
     return JSON.stringify(c);
   } catch {
     return '';
   }
 };
+// the groove as it was when opened from a file, link or example: that is not an unsaved change
+let cleanBase = null;
 function isDirty() {
   try {
     const it = S.libId ? lib().find((x) => x.id === S.libId) : null;
     if (it) return canonLoop(it.state) !== canonLoop(S);
+    if (cleanBase !== null && canonLoop(S) === cleanBase) return false;
     return !S.example && S.bars.some((b) => INSTR.some((i) => b[i.id].some((v) => v)));
   } catch {
     return false;
@@ -229,7 +254,7 @@ function cleanLoop(x, fallbackName = 'Imported groove') {
     return null;
   const tempo = Number(x.tempo);
   const st = {
-    name: (typeof x.name === 'string' && x.name.trim() ? x.name : fallbackName).slice(0, 60),
+    name: clip(typeof x.name === 'string' && x.name.trim() ? x.name : fallbackName, 60),
     tempo: Number.isFinite(tempo) ? Math.min(220, Math.max(40, Math.round(tempo))) : 96,
     beats,
     sub,

@@ -3,7 +3,7 @@
 
 // ---------- transport ----------
 let playing = false,
-  cur = 0,
+  head = { bar: null, i: 0, s: 0 }, // next step to play; the bar object survives deleting or moving bars
   nextT = 0,
   timer = null,
   queue = [],
@@ -21,28 +21,32 @@ function setPlayIcon() {
 }
 function tick() {
   const n = steps(),
-    total = n * S.bars.length,
     dur = 60 / S.tempo / S.sub;
   // swing: delay every second grid step; 0.5 = straight, 2/3 = triplet feel
   const sw = S.sub === 3 ? 0 : ((S.swing || 0.5) - 0.5) * 2 * dur;
   while (nextT < audio.currentTime + 0.12) {
     if (solo !== null && solo >= S.bars.length) solo = null;
-    const span = solo !== null ? n : total;
-    cur %= span;
-    const b = solo !== null ? solo : Math.floor(cur / n),
-      s = cur % n,
+    // keep the playhead in its bar when solo changes or bars are removed or moved
+    let b = solo !== null ? solo : S.bars.indexOf(head.bar);
+    if (b < 0) b = head.i % S.bars.length;
+    const s = head.s % n,
       bar = S.bars[b];
     const late = s % 2 === 1,
       t = nextT + (late ? sw : 0);
-    INSTR.forEach((ins) => {
-      const v = bar[ins.id][s];
-      if (v && !isMuted(ins.id)) triggerSound(ins.id, ins.arts[v - 1], t);
-    });
-    if (clickOn && s % S.sub === 0) metronome(t, s === 0);
-    if (countMode !== 'off' && s % S.sub === 0) sayWord(NUMS[s / S.sub], t, dur * S.sub, 1);
-    queue.push({ t, b, s });
+    // after a stall the missed steps are skipped, not played in a burst
+    if (t >= audio.currentTime) {
+      INSTR.forEach((ins) => {
+        const v = bar[ins.id][s];
+        if (v && !isMuted(ins.id)) triggerSound(ins.id, ins.arts[v - 1], t);
+      });
+      if (clickOn && s % S.sub === 0) metronome(t, s === 0);
+      if (countMode !== 'off' && s % S.sub === 0) sayWord(NUMS[s / S.sub], t, dur * S.sub, 1);
+      queue.push({ t, b, s });
+    }
     nextT += dur;
-    cur++;
+    const wrap = s + 1 >= n,
+      nb = wrap && solo === null ? (b + 1) % S.bars.length : b;
+    head = { bar: S.bars[nb], i: nb, s: wrap ? 0 : s + 1 };
   }
 }
 let shownBar = -1;
@@ -56,11 +60,36 @@ function followBar(b) {
   );
   const r = sec.getBoundingClientRect(),
     bottom = innerHeight - ($('transport')?.offsetHeight || 0);
+  const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+  if (!followBar.watch) {
+    // keep the lit step in view inside a wide, sideways-scrolling grid; hands off while the user touches it
+    followBar.touched = 0;
+    const touch = () => (followBar.touched = performance.now());
+    ['pointerdown', 'wheel', 'touchmove'].forEach((t) =>
+      $('bars').addEventListener(t, touch, { passive: true }),
+    );
+    followBar.watch = new MutationObserver((list) => {
+      if (!playing || performance.now() - followBar.touched < 3000) return;
+      const el = list.map((m) => m.target).find((n) => n.classList.contains('now'));
+      const sc = el?.closest('.scroller');
+      if (!sc || sc.scrollWidth <= sc.clientWidth) return;
+      const c = el.getBoundingClientRect(),
+        v = sc.getBoundingClientRect(),
+        pad = Math.min(90, v.width / 3);
+      if (c.left >= v.left + pad / 2 && c.right <= v.right - pad) return;
+      sc.scrollTo({
+        left: sc.scrollLeft + c.left - v.left - v.width / 4,
+        behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      });
+    });
+    followBar.watch.observe($('bars'), {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+  }
   if (r.top >= 0 && r.bottom <= bottom) return;
-  sec.scrollIntoView({
-    block: 'nearest',
-    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-  });
+  sec.scrollIntoView({ block: 'nearest', behavior });
 }
 function light() {
   let q = null;
@@ -80,35 +109,52 @@ function light() {
   }
   raf = requestAnimationFrame(light);
 }
-let starting = false;
+let starting = false,
+  startGen = 0;
 async function startPlayback() {
   if (starting || playing) return;
   starting = true;
+  const gen = ++startGen;
   try {
     if (!ensureAudio()) return;
     shownBar = -1;
     if (countMode !== 'off') await loadCount();
+    if (gen !== startGen) return; // Stop was pressed while the count was loading
     playing = true;
-    cur = 0;
+    head = { bar: S.bars[solo ?? 0], i: solo ?? 0, s: 0 };
     queue = [];
+    openBus();
     nextT = audio.currentTime + 0.06;
     tick();
     timer = setInterval(tick, 25);
     raf = requestAnimationFrame(light);
     setPlayIcon();
   } finally {
-    starting = false;
+    if (gen === startGen) starting = false;
   }
+  requestWake();
+}
+async function requestWake() {
+  if (!playing || wake) return;
   try {
     const w = await navigator.wakeLock?.request('screen');
-    if (playing) wake = w;
-    else w?.release();
+    if (!w) return;
+    // the browser drops the lock when the page is hidden
+    w.addEventListener('release', () => {
+      if (wake === w) wake = null;
+    });
+    if (playing && !wake) wake = w;
+    else w.release();
   } catch {}
 }
 function stopPlayback() {
+  startGen++;
+  starting = false;
   playing = false;
   clearInterval(timer);
   cancelAnimationFrame(raf);
+  clearTimeout(giveUp);
+  closeBus();
   queue = [];
   lit.forEach((el) => el.classList.remove('now'));
   lit = [];
@@ -119,6 +165,28 @@ function stopPlayback() {
   } catch {}
   wake = null;
 }
+const togglePlayback = () => (playing || starting ? stopPlayback() : startPlayback());
+// An interrupted or suspended audio clock (phone call, another app, backgrounding) must not leave
+// a frozen playhead under a Stop button. We try to resume; if the clock stays dead while the page
+// is in front, we stop and say so, so the next press of Play starts cleanly from the top. If it
+// comes back, the scheduler skips the steps it missed instead of playing them as a burst.
+let giveUp = 0;
+function onAudioState() {
+  clearTimeout(giveUp);
+  if (!playing || audio.state === 'running') return;
+  audio.resume().catch(() => {});
+  giveUp = setTimeout(() => {
+    if (playing && audio.state !== 'running' && document.visibilityState === 'visible') {
+      stopPlayback();
+      appStatus('Audio was interrupted. Press Play to start again.', 'info');
+    }
+  }, 1500);
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' || !playing) return;
+  if (audio.state !== 'running') audio.resume().catch(() => {});
+  requestWake();
+});
 let flashOn = store.get('groove.flash') !== false; // on until someone turns it off
 const dotsEl = $('beatdots');
 function renderDots(active) {
@@ -185,7 +253,7 @@ function setFlash(on) {
 }
 $('flashBtn').onclick = () => setFlash(!flashOn);
 setFlash(flashOn);
-$('play').onclick = () => (playing ? stopPlayback() : startPlayback());
+$('play').onclick = togglePlayback;
 $('click').onclick = (e) => {
   clickOn = !clickOn;
   e.currentTarget.setAttribute('aria-pressed', clickOn);
@@ -209,7 +277,7 @@ addEventListener(
     if (!spaceIsPlay(e)) return;
     e.preventDefault();
     e.stopPropagation();
-    if (!e.repeat) playing ? stopPlayback() : startPlayback();
+    if (!e.repeat) togglePlayback();
   },
   true,
 );
