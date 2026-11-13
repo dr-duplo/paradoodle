@@ -190,9 +190,36 @@ $('click').onclick = (e) => {
   clickOn = !clickOn;
   e.currentTarget.setAttribute('aria-pressed', clickOn);
 };
-document.addEventListener('keydown', (e) => {
-  if (e.code === 'Space' && !e.target.closest('input,select,textarea,button')) {
+// Space starts and stops playback anywhere in the main view, except while typing in a text field
+// (the groove or a bar name), in a menu, or with a panel open. It takes over from a focused cell,
+// button, slider or select, so Space never toggles the cell you tapped last.
+const TYPING =
+  'textarea, [contenteditable], input:not([type]), input[type="text"], input[type="search"], ' +
+  'input[type="number"], input[type="email"], input[type="url"], input[type="tel"], input[type="password"]';
+const spaceIsPlay = (e) =>
+  e.code === 'Space' &&
+  !e.metaKey &&
+  !e.ctrlKey &&
+  !e.altKey &&
+  !e.target.closest?.(`${TYPING}, [role="menuitem"]`) &&
+  !document.querySelector('.overlay:not([hidden])');
+addEventListener(
+  'keydown',
+  (e) => {
+    if (!spaceIsPlay(e)) return;
     e.preventDefault();
-    playing ? stopPlayback() : startPlayback();
-  }
-});
+    e.stopPropagation();
+    if (!e.repeat) playing ? stopPlayback() : startPlayback();
+  },
+  true,
+);
+// a button acts on Space when the key comes up, so the key-up is held back too
+addEventListener(
+  'keyup',
+  (e) => {
+    if (!spaceIsPlay(e)) return;
+    e.preventDefault();
+    e.stopPropagation();
+  },
+  true,
+);
