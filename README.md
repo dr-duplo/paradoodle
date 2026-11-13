@@ -8,7 +8,7 @@ A groove pops into your head on the bus, in the rehearsal room or halfway throug
 
 ![Paradoodle on a phone in landscape, showing the Kraut Break on the step grid](docs/screenshot.png)
 
-The whole app is a single HTML file. There's nothing to install, no account and no server. Your loops stay in your browser.
+There's nothing to install, no account and no server. Your loops stay in your browser.
 
 ## About the name
 
@@ -20,23 +20,21 @@ A _paradiddle_ is one of the first rudiments every drummer learns: right, left, 
 
 **Listen.** Playback uses a small drum kit synthesised in the browser. A metronome click, a flash on every beat or a spoken "1, 2, 3, 4" help you lock in, and the bar that's playing scrolls into view.
 
-**Keep.** Save loops to your library, undo and redo as much as you like (⌘Z / Ctrl+Z, ⇧⌘Z / Ctrl+Y), and back everything up as a JSON file.
+**Keep.** Tap the save icon next to the loop's name to keep it in your library under **Loops**; a dot on the icon means there are unsaved changes. Undo and redo sit at the top too (⌘Z / Ctrl+Z, ⇧⌘Z / Ctrl+Y), and you can back up the whole library as a JSON file.
 
-**Share.** Every loop fits into a link. Send it to your bandmate and they open exactly what you wrote, or paste one into the app to open it. When the app runs as its own page, the address follows along as you edit, so a bookmark or a copied address always holds the current groove.
+**Share.** Every loop fits into a link: tap the share button next to the name and the link is copied. Send it to your bandmate and they open exactly what you wrote, or paste one into the app to open it. When the app runs as its own page, the address follows along as you edit, so a bookmark or a copied address always holds the current groove.
 
-**Print.** Export a drum sheet with staff notation, the grid, or both, as a PNG or an A4 PDF.
+**Print.** The same share button exports a drum sheet with staff notation, the grid, or both, as a PNG or an A4 PDF.
+
+Not sure what a button does? Hover over it with a mouse and a short tip tells you.
 
 To get you started, the app opens with the **Kraut Break**, a two-bar groove full of ghost notes. You'll find it again under Loops → Examples.
 
 ## Run it
 
-Open `index.html` in a browser. That's it.
+Open `index.html` in a browser. That's it: the source runs as is, without a build step.
 
 The notation library (VexFlow) and the PDF library (jsPDF) load from public CDNs the first time you export, so exporting needs a connection. Sketching and playback work offline.
-
-### GitHub Pages
-
-`.github/workflows/pages.yml` builds the site and publishes it on every push to `main`. The live app is at [dr-duplo.github.io/paradoodle](https://dr-duplo.github.io/paradoodle/). For a fork, set **Settings → Pages → Source** to **GitHub Actions** once, and it is served at `https://<user>.github.io/<repo>/`.
 
 ## How the code is organized
 
@@ -71,27 +69,33 @@ npm run check   # formatting, lint and build in one go
 
 - `npm run format` formats everything with Prettier, and `npm run format:check` only reports.
 - `npm run lint` runs ESLint.
-- `npm run build` writes `dist/index.html`: a single minified file with the styles and scripts inlined. That's what GitHub Pages serves.
+- `npm run build` writes `dist/index.html`: a single minified file with the styles and scripts inlined. That's the version the live app runs.
 
-Every pull request runs the same checks plus `npm audit` (`.github/workflows/ci.yml`). CodeQL scans the code for security problems, and Dependabot proposes dependency and workflow updates every week. To make the checks block merging, add a branch rule for `main` under **Settings → Rules** that requires the **CI / check** status.
+Every pull request runs the same checks plus `npm audit` (`.github/workflows/ci.yml`). CodeQL scans the code for security problems, and Dependabot proposes dependency and workflow updates every week. Changes reach `main` only through pull requests, and a pull request merges only when its **CI / check** passes.
 
 ## How share links work
 
-A loop is packed bit by bit and written in base32 (`0-9a-v`) after `#paradoodle-`. A two-bar groove usually comes out at 50 to 120 characters. The `paradoodle-` tag marks the start of a loop, so the app finds one in any text: paste a link, or a whole chat message containing it, anywhere outside a text field and the loop opens.
+A share link ends in `#paradoodle-` and a code. The `paradoodle-` tag marks where a loop starts, so the app finds one in any text: paste a link, or a whole chat message containing one, anywhere outside a text field and the loop opens.
 
-| Field                        | Bits                                                                                   |
-| ---------------------------- | -------------------------------------------------------------------------------------- |
-| Format version               | 4                                                                                      |
-| Beats per bar − 2            | 3                                                                                      |
-| Feel (8ths, triplets, 16ths) | 2                                                                                      |
-| Tempo − 40                   | 8                                                                                      |
-| Swing − 50 %                 | 5                                                                                      |
-| Hidden kit rows              | 6                                                                                      |
-| Bars − 1                     | 3                                                                                      |
-| Loop name                    | 8-bit length + UTF-8                                                                   |
-| Per bar                      | default-name flag (or name), 6-bit mask of rows with notes, then each used row's steps |
+The code is the loop packed into bits, written most significant bit first and turned into base32 (`0-9a-v`), five bits per character. The last character is padded with zeros. A two-bar groove usually comes out at 50 to 120 characters.
 
-Each step takes only the bits its row needs: 1 for bass drum, crash and hi-hat foot, 2 for ride, hi-hat and snare. Rows without notes cost nothing. Links in the older version 1 format, which stored every row, still open.
+| Field             | Bits           | Value                                                                         |
+| ----------------- | -------------- | ----------------------------------------------------------------------------- |
+| Format version    | 4              | `2`                                                                           |
+| Beats per bar     | 3              | beats − 2 (2 to 7 beats)                                                      |
+| Feel              | 2              | `0` 8ths, `1` triplets, `2` 16ths                                             |
+| Tempo             | 8              | BPM − 40                                                                      |
+| Swing             | 5              | swing % − 50 (0 to 25)                                                        |
+| Hidden kit rows   | 6              | one bit per row, see below                                                    |
+| Bars              | 3              | bars − 1 (1 to 8 bars)                                                        |
+| Loop name         | 8 + 8 per byte | UTF-8 byte length, then the bytes (at most 255)                               |
+| Then for each bar |                |                                                                               |
+| Default name      | 1              | `1` if the bar is called "Bar _n_", `0` if a name follows                     |
+| Bar name          | 8 + 8 per byte | only when the flag is `0`, same format as the loop name                       |
+| Rows with notes   | 6              | one bit per row, see below                                                    |
+| Steps             | per used row   | beats × 2, 3 or 4 steps (by feel) for each row whose bit is set, in kit order |
+
+Both row masks use the kit order, with bit 0 (the lowest) for crash, then ride, hi-hat, snare, bass drum and bit 5 for hi-hat foot. A step is `0` for no note or the number of the sound: 1 bit for crash, bass drum and hi-hat foot, which have one sound each, and 2 bits for ride, hi-hat and snare. A row without notes costs only its bit in the mask.
 
 ## Built with
 
