@@ -310,7 +310,7 @@ function fitName() {
   c.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
   el.style.width =
     Math.ceil(
-      c.measureText(el.value || 'Untitled loop').width +
+      c.measureText(el.value || 'Untitled groove').width +
         parseFloat(cs.paddingLeft) +
         parseFloat(cs.paddingRight) +
         6,
@@ -357,7 +357,7 @@ document.addEventListener('keydown', (e) => {
 $('startBlank').onclick = () => {
   commit();
   solo = null;
-  S = { name: 'Untitled loop', tempo: S.tempo, beats: 4, sub: 4, bars: [blankBar(16, 'Bar 1')] };
+  S = { name: 'Untitled groove', tempo: S.tempo, beats: 4, sub: 4, bars: [blankBar(16, 'Bar 1')] };
   persist();
   renderAll();
 };

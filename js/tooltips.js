@@ -4,10 +4,10 @@
 const TIPS = {
   titleSave: () =>
     $('titleSave').classList.contains('dirty')
-      ? 'Save to Loops · you have unsaved changes'
-      : 'Save to Loops',
-  nameShare: 'Copy a share link or export the drum sheet',
-  libBtn: 'Your saved loops and the example grooves',
+      ? 'Save to Grooves · you have unsaved changes'
+      : 'Save to Grooves',
+  nameShare: 'Copy a share link (⌘C / Ctrl+C) or export the drum sheet',
+  libBtn: 'Your saved grooves and the examples',
   setupBtn: 'Time signature, feel, swing and kit',
   keyBtn: 'Show what each symbol means',
   barsMinus: 'Remove the last bar',
@@ -15,16 +15,16 @@ const TIPS = {
   hideEmpty: 'Hide kit rows that have no notes',
   startBlank: 'Clear the example and start from scratch',
   addBar: 'Add a bar at the end',
-  play: () => (playing ? 'Stop' : 'Play the loop'),
+  play: () => (playing ? 'Stop' : 'Play the groove'),
   countBtn: 'Spoken count: says 1 2 3 4 on the beats',
   flashBtn: 'Flash the background on every beat',
-  themeBtn: () => (isDark() ? 'Switch to the light theme' : 'Switch to the dark theme'),
+  themeBtn: themeTip,
   ghLink: 'Paradoodle on GitHub: source, issues and ideas',
   click: 'Metronome click on every beat',
   undo: 'Undo the last change',
   redo: 'Redo what you undid',
-  libMore: 'Share the current loop or export all loops',
-  newLoop: 'Start a new blank loop',
+  libMore: 'Share the current groove or export all grooves',
+  newLoop: 'Start a new blank groove',
   copyShare: 'Copy the link',
 };
 const ACT_TIPS = {

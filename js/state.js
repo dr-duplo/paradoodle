@@ -128,7 +128,7 @@ $('hideEmpty').onclick = () => {
 let S = null;
 try {
   const raw = store.get('groove.current');
-  S = cleanLoop(raw, 'Untitled loop');
+  S = cleanLoop(raw, 'Untitled groove');
   if (S && raw.example === true) S.example = true;
   if (S && typeof raw.libId === 'string') S.libId = raw.libId;
 } catch {
@@ -165,7 +165,7 @@ function syncUrl() {
 }
 const canonLoop = (st) => {
   try {
-    const c = cleanLoop(JSON.parse(JSON.stringify(st)), 'Untitled loop');
+    const c = cleanLoop(JSON.parse(JSON.stringify(st)), 'Untitled groove');
     if (!c) return '';
     delete c.example;
     delete c.libId;
@@ -188,7 +188,7 @@ function updateSaveDot() {
   if (!b) return;
   const d = isDirty();
   b.classList.toggle('dirty', d);
-  b.setAttribute('aria-label', d ? 'Save loop (unsaved changes)' : 'Save loop');
+  b.setAttribute('aria-label', d ? 'Save groove (unsaved changes)' : 'Save groove');
 }
 function changed() {
   if (S.example) {
@@ -201,7 +201,7 @@ function changed() {
 }
 
 // Check a loop from storage, a file or a link, and repair what can be repaired.
-function cleanLoop(x, fallbackName = 'Imported loop') {
+function cleanLoop(x, fallbackName = 'Imported groove') {
   if (!x || typeof x !== 'object' || Array.isArray(x)) return null;
   const beats = Number(x.beats),
     sub = Number(x.sub);

@@ -1,109 +1,128 @@
-# Paradoodle
+# <img src="icons/icon.svg" alt="" width="40" height="40" align="absmiddle"> Paradoodle
 
-**Doodle your grooves.**
+**Ever wanted to quickly doodle a groove, or try one out before you practise it?**
 
-**Try it now: [dr-duplo.github.io/paradoodle](https://dr-duplo.github.io/paradoodle/)**. It runs in any modern browser and is made for phones.
+Paradoodle lets you doodle your grooves. Maybe one pops into your head on the bus, in the rehearsal room or halfway through a song; get it down before it's gone. Tap the beat into a grid, play it back to check it feels right, practise along with a click or a spoken count, and when it's ready, export a proper drum sheet with staff notation for the next session.
 
-A groove pops into your head on the bus, in the rehearsal room or halfway through a song you're listening to. Paradoodle is a place to get it down before it's gone. Tap the beat into a grid on your phone, play it back to check it feels right, and when it does, export a proper drum sheet with staff notation to bring to the next session.
+**Try it now: [dr-duplo.github.io/paradoodle](https://dr-duplo.github.io/paradoodle/)**. It runs in any modern browser, is made for phones and can be installed like an app.
 
-![Paradoodle on a phone in landscape, showing the Kraut Break on the step grid](docs/screenshot.png)
+![Paradoodle in the browser with the Kraut Break, a two-bar groove, on the step grid](docs/screenshot.png)
 
-There's nothing to install, no account and no server. Your loops stay in your browser.
+## Features
 
-## About the name
+- Quickly doodle your groove on a tap-to-draw drum grid
+- Save, import and export your grooves
+- Copy a groove as a link to share it, and paste a link anywhere in the app to open one
+- Practise along with a click, a visual flash or a spoken count
+
+## Why "Paradoodle"
 
 A _paradiddle_ is one of the first rudiments every drummer learns: right, left, right, right, left, right, left, left. A _doodle_ is what you scribble in the margin when an idea won't leave you alone. Paradoodle is the two put together: drum ideas, sketched quickly and a little messily, the way they arrive.
 
-## What it does
+## In detail
 
-**Sketch.** The grid has rows for crash, ride, hi-hat, snare, bass drum and hi-hat foot. Tap a cell to cycle through its sounds (closed, open or ghosted hi-hat; hit, rim or ghost on the snare) and hold it to clear. Bars can have 2 to 7 beats in 8ths, triplets or 16ths, with as much swing as the groove needs. A loop holds up to 8 bars, and you can name, reorder, duplicate or solo each one.
+**Sketch.** The grid has rows for crash, ride, hi-hat, snare, bass drum and hi-hat foot. Tap a cell to cycle through its sounds (closed, open or ghosted hi-hat; hit, rim or ghost on the snare) and hold it to clear. Bars can have 2 to 7 beats in 8ths, triplets or 16ths, with as much swing as the groove needs. A groove holds up to 8 bars, and you can name, reorder, duplicate or solo each one.
 
-**Listen.** Playback uses a small drum kit synthesised in the browser. A metronome click, a flash on every beat or a spoken "1, 2, 3, 4" help you lock in, and the bar that's playing scrolls into view. Tap an instrument's name to mute it while you listen, or double-tap it to hear that instrument alone; a second double-tap brings everything back.
+**Listen.** Playback uses a small drum kit synthesised in the browser. A metronome click, a flash on every beat or a spoken "1, 2, 3, 4" help you lock in, and the bar that's playing scrolls into view. Tap an instrument's name to mute it, or double-tap it to hear that instrument alone; double-tap again to bring everything back.
 
-**Keep.** Tap the save icon at the top to keep the loop in your library under **Loops**; a dot on the icon means there are unsaved changes. Undo and redo sit at the top too (⌘Z / Ctrl+Z, ⇧⌘Z / Ctrl+Y), and you can back up the whole library as a JSON file.
+**Keep.** The save icon at the top keeps the groove in your library under **Grooves**; a dot on it means there are unsaved changes. Undo and redo sit next to it (⌘Z / Ctrl+Z, ⇧⌘Z / Ctrl+Y).
 
-**Share.** Every loop fits into a link: tap the share button at the top right and copy the link. Send it to your bandmate and they open exactly what you wrote, or paste one into the app to open it. When the app runs as its own page, the address follows along as you edit, so a bookmark or a copied address always holds the current groove.
+**Share.** Every groove fits into a link: tap the share button at the top right to copy it, or press ⌘C / Ctrl+C with nothing selected. Your bandmate opens exactly what you wrote. Paste a link, or a whole chat message containing one, anywhere in the app to open it. The address in the browser follows along as you edit, so a bookmark always holds the current groove.
 
-**Print.** The same share button exports a drum sheet with staff notation, the grid, or both, as a PNG or an A4 PDF.
+**Print.** The share button also exports a drum sheet with staff notation, the grid, or both, as a PNG or an A4 PDF.
 
-The moon button next to the playback toggles switches between a dark and a light theme. Not sure what a button does? Hover over it with a mouse and a short tip tells you.
-
-To get you started, the app opens with the **Kraut Break**, a two-bar groove full of ghost notes. You'll find it again under Loops → Examples.
+The theme button in the playback bar switches between dark, light and auto (following your system), and hovering over any button with a mouse tells you what it does. The app opens with the **Kraut Break**, a two-bar groove full of ghost notes; under **Grooves → Examples** you'll find it again, together with nine more: styles from a rock beat to bossa nova and jazz swing, and famous breaks such as the Amen Break and Funky Drummer, simplified to fit the kit.
 
 ## Install it
 
-Paradoodle is an installable web app. In Chrome or Edge, use **Install** in the address bar or the menu; on Android, **Add to Home screen**; on an iPhone or iPad, open it in Safari, tap **Share** and then **Add to Home Screen**. It then opens in its own window, without the browser around it, and works offline: sketching and playback always, exporting once you have exported a sheet with a connection.
+- **Chrome or Edge on a computer:** click **Install** in the address bar or the browser menu.
+- **Android:** open the menu and choose **Add to Home screen** or **Install app**.
+- **iPhone or iPad:** open the page in Safari, tap **Share**, then **Add to Home Screen**.
 
-On iPhone and iPad, the installed app keeps its own storage, separate from Safari. To bring loops over, send yourself a share link or use Export and Import in the Loops panel.
+The installed app opens in its own window and works offline. Sketching and playback always work; exporting works offline once you have exported a sheet with a connection, because that is when the notation and PDF libraries are downloaded.
 
-## Run it
+On iPhone and iPad, the installed app keeps its own storage, separate from Safari. To bring grooves over, send yourself a share link, or use **Export all** and **Import** in the Grooves panel.
 
-Open `index.html` in a browser. That's it: the source runs as is, without a build step.
+## Your grooves and your privacy
 
-The notation library (VexFlow) and the PDF library (jsPDF) load from public CDNs the first time you export, so exporting needs a connection. Both are pinned to an exact version, and the browser checks each file against its integrity hash before running it. Sketching and playback work offline.
+There's no account and no server of ours. Your grooves are kept in your browser on your device, and nothing about them is sent anywhere. A share link carries the groove after the `#`, the part of an address browsers never send to a server, so even the site that hosts the app doesn't see it.
 
-## How the code is organized
+The app does load its fonts from Google Fonts and, when you first export, the notation library (VexFlow) and the PDF library (jsPDF) from public CDNs. Both libraries are pinned to an exact version and checked against an integrity hash before they run.
 
-There is no framework and no bundler during development. `index.html` holds the markup, `styles.css` the look, and `js/` the behaviour, split into plain scripts that load in order and share one global scope. Each file starts with a short note on what it does.
+Browsers can clear stored data, so back up the grooves you care about with **Export all** in the Grooves panel. The file can be imported again on any device.
+
+## For developers
+
+### Run it locally
+
+Open `index.html` in a browser. The source runs as it is, without a build step.
+
+To try the installable app, build it and serve `dist` over `localhost`, since service workers don't run from files:
+
+```sh
+npm install
+npm run build
+python3 -m http.server 8080 -d dist   # then open http://localhost:8080
+```
+
+### How the code is organized
+
+There is no framework and no bundler during development. `index.html` holds the markup, `styles.css` the look, and `js/` the behaviour, split into plain scripts that load in order and share one global scope. Each file starts with a short note on what it does. In the code, a groove is still called a _loop_ (`S`, `cleanLoop`, `loop-files.js`).
 
 | File                             | What it does                                                                                     |
 | -------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `js/basics.js`                   | The drum kit, the note symbols, small helpers (`$`, `esc`, `store`) and the pinned CDN libraries |
-| `js/theme.js`                    | The light and dark theme and the moon/sun button                                                 |
-| `js/state.js`                    | The loop being edited (`S`), checking and repairing loops, undo history, the unsaved-changes dot |
+| `js/theme.js`                    | The light and dark theme and the auto/light/dark button                                          |
+| `js/state.js`                    | The groove being edited (`S`), checking and repairing grooves, undo, the unsaved-changes dot     |
 | `js/render.js`                   | Draws the summary line, kit chips and every bar's grid                                           |
-| `js/editing.js`                  | Tapping cells and everything else you can change about a loop                                    |
-| `js/mute.js`                     | Muting kit rows while listening (tap or double-tap an instrument name)                           |
+| `js/editing.js`                  | Tapping cells and everything else you can change about a groove                                  |
+| `js/mute.js`                     | Muting instruments while listening                                                               |
 | `js/audio.js`                    | The synthesised drum kit and the spoken count                                                    |
 | `js/playback.js`                 | Play and stop, the scheduler, playhead, click and beat flash                                     |
 | `js/notation.js`                 | Staff notation with VexFlow                                                                      |
 | `js/export-sheet.js`             | The printable sheet as PNG or PDF                                                                |
 | `js/examples.js`                 | Built-in example grooves                                                                         |
-| `js/library.js`                  | Saved loops and the Loops panel                                                                  |
-| `js/loop-files.js`               | Exporting and importing loops as JSON                                                            |
-| `js/share-links.js`              | Packing a loop into a link and opening links                                                     |
+| `js/library.js`                  | Saved grooves and the Grooves panel                                                              |
+| `js/loop-files.js`               | Exporting and importing grooves as JSON                                                          |
+| `js/share-links.js`              | Packing a groove into a link and opening links                                                   |
 | `js/tooltips.js`                 | Hover tips on buttons                                                                            |
-| `js/main.js`                     | Starts the app                                                                                   |
+| `js/main.js`                     | Starts the app and registers the service worker                                                  |
+| `js/count-sounds.js`             | The spoken count as base64 WAV data                                                              |
 | `sw.js`                          | The service worker that keeps the app and its libraries for offline use                          |
 | `manifest.webmanifest`, `icons/` | The app's name, colours and icons for installing                                                 |
-| `js/count-sounds.js`             | The spoken count as base64 WAV data                                                              |
 
-## Development
+### Checks
 
-You need Node 18 or newer.
-
-```sh
-npm install
-npm run check   # formatting, lint and build in one go
-```
+You need Node 18 or newer. `npm run check` runs formatting, lint and build in one go.
 
 - `npm run format` formats everything with Prettier, and `npm run format:check` only reports.
 - `npm run lint` runs ESLint.
-- `npm run build` writes `dist/index.html`: a single minified file with the styles and scripts inlined, plus a Content Security Policy that lets the page run only its own script and the two pinned libraries. That's the version the live app runs.
+- `npm run build` writes `dist/`: a single minified `index.html` with the styles and scripts inlined and a Content Security Policy that lets the page run only its own script and the two pinned libraries, plus the service worker, the manifest and the icons. That's what the live app serves.
 
-Every pull request runs the same checks plus `npm audit` (`.github/workflows/ci.yml`). CodeQL scans the code for security problems, and Dependabot proposes dependency and workflow updates every week. Changes reach `main` only through pull requests, and a pull request merges only when its **CI / check** passes.
+Every pull request runs the same checks plus `npm audit`. CodeQL scans the code for security problems, and Dependabot proposes dependency and workflow updates every week. Changes reach `main` only through pull requests, a pull request merges only when its **CI / check** passes, and every push to `main` deploys to GitHub Pages.
 
-## How share links work
+### The share link format
 
-A share link ends in `#paradoodle-` and a code. The `paradoodle-` tag marks where a loop starts, so the app finds one in any text: paste a link, or a whole chat message containing one, anywhere outside a text field and the loop opens.
+A share link ends in `#paradoodle-` and a code. The `paradoodle-` tag marks where a groove starts, which is how the app finds one in pasted text.
 
-The code is the loop packed into bits, written most significant bit first and turned into base32 (`0-9a-v`), five bits per character. The last character is padded with zeros. A two-bar groove usually comes out at 50 to 120 characters.
+The code is the groove packed into bits, written most significant bit first and turned into base32 (`0-9a-v`), five bits per character, with the last character padded with zeros. Two more characters follow: a CRC-10 checksum (polynomial `0x233`) of all the characters before them. It rejects any damage within two neighbouring characters, such as a typo or two swapped characters, and all but about 1 in 1000 other changes, such as a link that was cut off. A two-bar groove usually comes out at 50 to 120 characters.
 
 | Field             | Bits           | Value                                                                         |
 | ----------------- | -------------- | ----------------------------------------------------------------------------- |
-| Format version    | 4              | `2`                                                                           |
+| Format version    | 4              | `3`                                                                           |
 | Beats per bar     | 3              | beats − 2 (2 to 7 beats)                                                      |
 | Feel              | 2              | `0` 8ths, `1` triplets, `2` 16ths                                             |
 | Tempo             | 8              | BPM − 40                                                                      |
 | Swing             | 5              | swing % − 50 (0 to 25)                                                        |
 | Hidden kit rows   | 6              | one bit per row, see below                                                    |
 | Bars              | 3              | bars − 1 (1 to 8 bars)                                                        |
-| Loop name         | 8 + 8 per byte | UTF-8 byte length, then the bytes (at most 255)                               |
+| Groove name       | 8 + 8 per byte | UTF-8 byte length, then the bytes (at most 255)                               |
 | Then for each bar |                |                                                                               |
 | Default name      | 1              | `1` if the bar is called "Bar _n_", `0` if a name follows                     |
-| Bar name          | 8 + 8 per byte | only when the flag is `0`, same format as the loop name                       |
+| Bar name          | 8 + 8 per byte | only when the flag is `0`, same format as the groove name                     |
 | Rows with notes   | 6              | one bit per row, see below                                                    |
 | Steps             | per used row   | beats × 2, 3 or 4 steps (by feel) for each row whose bit is set, in kit order |
+| Checksum          | 10             | CRC-10 of the padded code, as two more characters                             |
 
 Both row masks use the kit order, with bit 0 (the lowest) for crash, then ride, hi-hat, snare, bass drum and bit 5 for hi-hat foot. A step is `0` for no note or the number of the sound: 1 bit for crash, bass drum and hi-hat foot, which have one sound each, and 2 bits for ride, hi-hat and snare. A row without notes costs only its bit in the mask.
 
