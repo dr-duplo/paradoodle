@@ -1,0 +1,21 @@
+{
+  "name": "paradoodle",
+  "version": "1.0.0",
+  "description": "Doodle your grooves: a drum-loop sketchpad for your phone.",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "build": "node scripts/build.mjs",
+    "check": "npm run format:check && npm run lint && npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.9.1",
+    "esbuild": "0.25.5",
+    "eslint": "9.9.1",
+    "globals": "15.9.0",
+    "prettier": "3.3.3"
+  }
+}

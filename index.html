@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="description" content="Doodle your grooves: a drum-loop sketchpad for your phone." />
+    <title>Paradoodle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="top">
+        <span class="brand">Paradoodle</span>
+        <span class="spacer"></span>
+        <span class="histgrp">
+          <button class="btn iconbtn hdrsave" id="undo" type="button" aria-label="Undo" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M9 14L4 9l5-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button class="btn iconbtn hdrsave" id="redo" type="button" aria-label="Redo" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M15 14l5-5-5-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </span>
+        <span class="hdrdiv" aria-hidden="true"></span>
+        <button class="btn iconbtn hdrsave" id="titleSave" type="button" aria-label="Save loop">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+              <path d="M5 4h11.5L20 7.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
+              <path d="M8 4v5h7V4M8 20v-6h8v6" />
+            </g>
+          </svg>
+        </button>
+        <span class="hdracts">
+          <button
+            class="btn iconbtn hdrsave"
+            id="nameShare"
+            type="button"
+            data-act="menu"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-label="Share or export"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="18" cy="5.5" r="2.6" />
+                <circle cx="6" cy="12" r="2.6" />
+                <circle cx="18" cy="18.5" r="2.6" />
+                <path d="M8.3 10.8l7.4-4M8.3 13.2l7.4 4" />
+              </g>
+            </svg>
+          </button>
+          <div class="barmenu" role="menu" hidden>
+            <button class="btn ghost" type="button" role="menuitem" id="shareCopy">
+              Copy link
+            </button>
+            <button class="btn ghost" type="button" role="menuitem" id="exportBtn">
+              Export sheet
+            </button>
+          </div>
+        </span>
+        <button class="btn iconbtn hdrsave" id="libBtn" type="button" aria-label="Loops">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect
+              x="3.5"
+              y="9"
+              width="17"
+              height="11.5"
+              rx="1.5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M5.5 5.5h13M8 2.5h8"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </header>
+      <div class="namerow">
+        <input
+          class="name"
+          id="name"
+          type="text"
+          aria-label="Loop name"
+          maxlength="60"
+          spellcheck="false"
+        />
+      </div>
+
+      <div class="summary">
+        <button
+          class="sumbtn"
+          id="setupBtn"
+          type="button"
+          aria-expanded="false"
+          aria-controls="setup"
+        >
+          <span id="sumText"></span><span class="chev" aria-hidden="true"></span>
+        </button>
+        <button
+          class="btn ghost keybtn"
+          id="keyBtn"
+          type="button"
+          aria-expanded="false"
+          aria-controls="legend"
+        >
+          Key
+        </button>
+      </div>
+
+      <div class="setup" id="setup" hidden>
+        <label class="field"
+          ><span>Time</span>
+          <select id="beats">
+            <option value="2">2/4</option>
+            <option value="3">3/4</option>
+            <option value="4">4/4</option>
+            <option value="5">5/4</option>
+            <option value="6">6/4</option>
+            <option value="7">7/4</option>
+          </select>
+        </label>
+        <label class="field"
+          ><span>Grid</span>
+          <select id="sub">
+            <option value="2">8ths</option>
+            <option value="4">16ths</option>
+            <option value="3">Triplets</option>
+          </select>
+        </label>
+        <label class="field" id="swingField"
+          ><span>Swing</span>
+          <input type="range" id="swing" min="50" max="75" step="1" aria-describedby="swingOut" />
+          <output id="swingOut" class="swingout"></output>
+        </label>
+        <div class="field">
+          <span>Bars</span>
+          <div class="stepper">
+            <button type="button" id="barsMinus" aria-label="Remove last bar">−</button
+            ><output id="barsOut">1</output
+            ><button type="button" id="barsPlus" aria-label="Add bar">+</button>
+          </div>
+        </div>
+        <div class="rows" role="group" aria-label="Kit: drums shown in the grid">
+          <span class="rows-label">Kit</span>
+          <div class="chips" id="rowChips"></div>
+          <button class="btn ghost" type="button" id="hideEmpty">Hide unused</button>
+        </div>
+      </div>
+
+      <div class="legend" id="legend" hidden></div>
+
+      <div class="example" id="exampleNote" hidden>
+        <span
+          ><strong>Example groove loaded.</strong> Tap a cell to cycle sounds, hold to clear.</span
+        >
+        <button class="btn" type="button" id="startBlank">Start blank</button>
+      </div>
+
+      <p class="status appstatus" id="appStatus" role="status"></p>
+      <div class="bars" id="bars"></div>
+      <button class="btn addbar" type="button" id="addBar">+ Add bar</button>
+    </div>
+
+    <div class="transport" id="transport">
+      <div class="in">
+        <button class="play" id="play" type="button" aria-label="Play"></button>
+        <div class="tempo">
+          <span class="bpm" id="bpm">96</span><small>BPM</small>
+          <input type="range" id="tempo" min="40" max="220" step="1" aria-label="Tempo" />
+        </div>
+        <div class="beatdots" id="beatdots" aria-hidden="true"></div>
+        <span class="spacer"></span>
+        <span class="toggles">
+          <button
+            class="btn toggle tbtn"
+            id="countBtn"
+            type="button"
+            aria-pressed="false"
+            aria-label="Spoken count 1 2 3 4"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M4 5.5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-9l-4.5 3.5v-3.5H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <text
+                x="12"
+                y="14.6"
+                text-anchor="middle"
+                font-size="8.5"
+                font-weight="700"
+                font-family="system-ui,sans-serif"
+                fill="currentColor"
+              >
+                123
+              </text>
+            </svg>
+          </button>
+          <button
+            class="btn toggle tbtn"
+            id="flashBtn"
+            type="button"
+            aria-pressed="false"
+            aria-label="Flash"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M13.5 2.5L5 13.5h6l-1 8 8.5-11h-6z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button
+            class="btn toggle tbtn"
+            id="click"
+            type="button"
+            aria-pressed="false"
+            aria-label="Metronome click"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M9 3h6l4 18H5z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M12 15.5l5-9M7.5 15.5h9"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </span>
+      </div>
+    </div>
+
+    <div class="overlay" id="exportOv" hidden>
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+        <div class="row">
+          <h3 id="exportTitle">Drum sheet</h3>
+          <span class="spacer" style="flex: 1"></span
+          ><button class="btn ghost" type="button" data-close>Close</button>
+        </div>
+        <div class="row" style="margin-top: 10px">
+          <label class="field"
+            ><span>Sheet</span>
+            <select id="sheetStyle">
+              <option value="both">Staff + grid</option>
+              <option value="staff">Staff only</option>
+              <option value="grid">Grid only</option>
+            </select>
+          </label>
+        </div>
+        <div class="body">
+          <img class="preview" id="previewImg" alt="Preview of the exported drum sheet" />
+        </div>
+        <div class="row" id="saveRow">
+          <button class="btn primary" type="button" id="savePng">Save PNG</button>
+          <button class="btn" type="button" id="savePdf">Save PDF</button>
+          <span class="status" id="saveStatus" role="status"></span>
+        </div>
+        <p class="hint" id="noSaveHint" hidden>
+          Saving files isn't available in this view. Press and hold the image to save it.
+        </p>
+      </div>
+    </div>
+
+    <div class="overlay" id="libOv" hidden>
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="libTitle">
+        <div class="row">
+          <h3 id="libTitle">Loops</h3>
+          <span class="spacer" style="flex: 1"></span
+          ><button class="btn ghost" type="button" data-close>Close</button>
+        </div>
+        <div class="libbar">
+          <button class="btn" type="button" id="newLoop" aria-label="New blank loop">New</button>
+          <label class="btn" for="importFile">Import</label>
+          <span class="spacer"></span>
+          <input type="file" id="importFile" accept=".json,application/json" hidden />
+          <span class="acts">
+            <button
+              class="btn ghost more"
+              type="button"
+              id="libMore"
+              data-act="menu"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-label="More loop actions"
+            >
+              ⋯
+            </button>
+            <div class="barmenu" role="menu" hidden>
+              <button class="btn ghost" type="button" role="menuitem" id="shareCurrent">
+                Share current loop
+              </button>
+              <button class="btn ghost" type="button" role="menuitem" id="exportLoops">
+                Export all
+              </button>
+            </div>
+          </span>
+        </div>
+        <p class="status" id="libStatus" role="status"></p>
+        <div class="sharebox" id="shareBox" hidden>
+          <input type="text" id="shareUrl" readonly aria-label="Share link" />
+          <button class="btn" type="button" id="copyShare">Copy</button>
+        </div>
+        <div class="body">
+          <h4 class="libhead mine">My loops</h4>
+          <ul class="lib" id="libList"></ul>
+          <details class="exgroup" id="exGroup">
+            <summary class="libhead">Examples <span class="excount" id="exCount"></span></summary>
+            <ul class="lib" id="exList"></ul>
+          </details>
+        </div>
+        <p class="hint">
+          Loops are kept in this browser on this device. Use Export to back them up or move them to
+          another device.
+        </p>
+      </div>
+    </div>
+    <script src="js/count-sounds.js"></script>
+    <script src="js/basics.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/render.js"></script>
+    <script src="js/editing.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/playback.js"></script>
+    <script src="js/notation.js"></script>
+    <script src="js/export-sheet.js"></script>
+    <script src="js/examples.js"></script>
+    <script src="js/library.js"></script>
+    <script src="js/loop-files.js"></script>
+    <script src="js/share-links.js"></script>
+    <script src="js/tooltips.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
