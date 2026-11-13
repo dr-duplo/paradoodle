@@ -14,28 +14,37 @@ const files = [...html.matchAll(scriptTag)].map((m) => m[1]);
 if (!files.length) throw new Error('No <script src="js/..."> tags found in index.html');
 const source = (await Promise.all(files.map((f) => readFile(f, 'utf8')))).join(';\n');
 const { code: jsMin } = await transform(source, { loader: 'js', minify: true, format: 'iife' });
+// The script goes into the page as it is, so it must not end its own <script> element early.
+const inlineJs = jsMin.trim();
+if (/<\/script/i.test(inlineJs)) throw new Error('The minified script contains "</script"');
 
 const styleTag = /<link rel="stylesheet" href="styles\.css"\s*\/?>/;
 if (!styleTag.test(html))
   throw new Error('No <link rel="stylesheet" href="styles.css"> found in index.html');
 
-let page = html.replace(styleTag, () => `<style>${cssMin.trim()}</style>`).replace(scriptTag, '');
-page = page
-  .replace('</body>', () => `<script>${jsMin.trim()}</script>\n</body>`)
+let page = html
+  .replace(styleTag, () => `<style>${cssMin.trim()}</style>`)
+  .replace(scriptTag, '')
   .split('\n')
   .map((line) => line.trim())
   .filter(Boolean)
   .join('\n');
-if (!page.includes('<script>')) page += `\n<script>${jsMin.trim()}</script>`;
+// The script goes in after the lines are trimmed, so it reaches the page exactly as minified.
+const scriptEl = `<script>${inlineJs}</script>`;
+page = page.includes('</body>')
+  ? page.replace('</body>', () => `${scriptEl}\n</body>`)
+  : `${page}\n${scriptEl}`;
 
 if (/href="styles\.css"|src="js\//.test(page))
   throw new Error('dist/index.html still links to source files');
 
 // Content Security Policy: the page may run only its own inline script (pinned by hash) and the
 // CDN libraries listed in js/basics.js (LIBS), load fonts from Google Fonts, and nothing else.
-const inline = [...page.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
-if (inline.length !== 1) throw new Error(`Expected one inline script, found ${inline.length}`);
-const scriptHash = createHash('sha256').update(inline[0]).digest('base64');
+// The hash is taken from the script the build put in, not from parsing the page; the page must
+// hold no other script element, in any letter case.
+const scripts = page.match(/<script\b/gi) || [];
+if (scripts.length !== 1) throw new Error(`Expected one script element, found ${scripts.length}`);
+const scriptHash = createHash('sha256').update(inlineJs).digest('base64');
 const libs = [
   ...(await readFile('js/basics.js', 'utf8')).matchAll(/src: '(https:\/\/[^']+)'/g),
 ].map((m) => m[1]);
