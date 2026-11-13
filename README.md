@@ -29,7 +29,7 @@ A _paradiddle_ is one of the first rudiments every drummer learns: right, left, 
 
 **Share.** Every groove fits into a link: tap the share button at the top right to copy it, or press ⌘C / Ctrl+C with nothing selected. **Show QR code** in the same menu draws the link as a QR code, so someone next to you can scan it with their phone. The browser tab shows the groove's name; a preview of the link in a chat app shows Paradoodle itself, because the groove sits after the `#`, which chat apps never get to see. Your bandmate opens exactly what you wrote. Paste a link, or a whole chat message containing one, anywhere in the app to open it. The address in the browser follows along as you edit, so a bookmark always holds the current groove.
 
-**Print.** The share button also exports a drum sheet with staff notation, the grid, or both, as a PNG or an A4 PDF.
+**Print.** The share button also exports a drum sheet with staff notation, the grid, or both, as a PNG or an A4 PDF. A QR code of the groove sits at the top left, beside the title, so a printed sheet can be scanned to hear it again; in the PDF, it is also a link.
 
 The theme button in the playback bar switches between dark, light and auto (following your system), and hovering over any button with a mouse tells you what it does. The app opens with the **Kraut Break**, a two-bar groove full of ghost notes; under **Grooves → Examples** you'll find it again, together with nine more: styles from a rock beat to bossa nova and jazz swing, and famous breaks such as the Amen Break and Funky Drummer, simplified to fit the kit.
 

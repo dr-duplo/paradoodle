@@ -20,6 +20,24 @@ function drawGlyph(ctx, g, cx, cy, size, color) {
   });
   ctx.restore();
 }
+// The groove's link as a QR code for the sheet's header, drawn from the same SVG as the share
+// panel. Modules stay at least about 0.4 mm on A4 so the code scans from paper; without the QR
+// library (offline before first use) the sheet goes without it.
+async function sheetQr(url) {
+  try {
+    await loadLib('qrcode');
+    const svg = qrSvg(url),
+      modules = +svg.match(/viewBox="0 0 (\d+)/)[1];
+    const img = new Image();
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    await img.decode();
+    const size = Math.max(220, Math.ceil(modules * 3.4));
+    // the code's dark modules end inside a 4-module white margin
+    return { img, size, inset: (4 * size) / modules };
+  } catch {
+    return null;
+  }
+}
 async function renderSheet(style) {
   try {
     await Promise.all(
@@ -61,8 +79,14 @@ async function renderSheet(style) {
   const barBlock = headH + countH + ROWS.length * rowH + gap;
   const gridH = showGrid ? S.bars.length * barBlock + (showStaff ? 50 : 0) : 0;
   const legendH = (showGrid ? 150 : 0) + (showStaff ? 300 : 0);
+  const url = SHARE_BASE + loopHash(S),
+    qr = await sheetQr(url);
   const footH = 60;
-  const H = M + 170 + staffH + gridH + legendH + footH + M * 0.6;
+  // with a QR code, the header is as tall as the code, which sits on the left of the title
+  const qrTop = M - 14,
+    ruleY = qr ? Math.max(M + 126, qrTop + qr.size + 18) : M + 126,
+    bodyY = ruleY + 44;
+  const H = bodyY + staffH + gridH + legendH + footH + M * 0.6;
   const cv = document.createElement('canvas');
   cv.width = W;
   cv.height = Math.ceil(H);
@@ -80,21 +104,43 @@ async function renderSheet(style) {
     ctx.fillText(t, M, y);
   };
   ctx.textBaseline = 'alphabetic';
+  // title and info line; with a QR code they sit to its right, on its bottom edge, shrunk if
+  // needed to fit the width
+  // the code's white margin hangs into the page margin, so its dark modules line up with the rule
+  const qx = qr ? M - qr.inset : M,
+    tx = qr ? qx + qr.size - qr.inset + 40 : M,
+    infoY = qr ? qrTop + qr.size - qr.inset : M + 98, // on the code's last row of modules
+    titlePx = qr ? 96 : 64,
+    titleY = infoY - (qr ? 52 : 48),
+    textW = W - M - tx;
+  const fitText = (t, weight, px, family, x, yy) => {
+    let size = px;
+    ctx.font = `${weight} ${size}px ${family}`;
+    while (size > 12 && ctx.measureText(t).width > textW)
+      ctx.font = `${weight} ${--size}px ${family}`;
+    ctx.fillText(t, x, yy);
+  };
   ctx.fillStyle = INK;
-  ctx.font = `700 64px ${FD}`;
-  ctx.fillText(S.name || 'Untitled groove', M, M + 50);
-  ctx.font = `500 24px ${FM}`;
+  fitText(S.name || 'Untitled groove', 700, titlePx, FD, tx, titleY);
   ctx.fillStyle = MUTED;
   const feel = { 2: '8th notes', 3: '8th-note triplets', 4: '16th notes' }[S.sub];
   const swingTxt = S.sub !== 3 && swingPct() > 50 ? `   ·   swing ${swingPct()}%` : '';
-  ctx.fillText(
+  fitText(
     `♩ = ${S.tempo}   ·   ${S.beats}/4   ·   ${feel}${swingTxt}   ·   ${S.bars.length} bar${S.bars.length > 1 ? 's' : ''}`,
-    M,
-    M + 98,
+    500,
+    24,
+    FM,
+    tx,
+    infoY,
   );
+  // the groove's QR code on the left; in the PDF, the code and the title link to the groove
+  if (qr) {
+    ctx.drawImage(qr.img, qx, qrTop, qr.size, qr.size);
+    cv.link = { url, x: qx, y: qrTop, w: W - M - qx, h: qr.size };
+  }
   ctx.fillStyle = INK;
-  ctx.fillRect(M, M + 126, W - 2 * M, 3);
-  let y = M + 170;
+  ctx.fillRect(M, ruleY, W - 2 * M, 3);
+  let y = bodyY;
   if (showStaff) {
     ctx.save();
     ctx.translate(M, y);
@@ -306,16 +352,14 @@ function pdfBlob() {
     h = 297;
     w = h / ratio;
   }
-  pdf.addImage(
-    sheetCanvas.toDataURL('image/png'),
-    'PNG',
-    (210 - w) / 2,
-    0,
-    w,
-    h,
-    undefined,
-    'FAST',
-  );
+  const x0 = (210 - w) / 2;
+  pdf.addImage(sheetCanvas.toDataURL('image/png'), 'PNG', x0, 0, w, h, undefined, 'FAST');
+  // the QR code and its caption link to the groove
+  const L = sheetCanvas.link;
+  if (L) {
+    const k = w / sheetCanvas.width;
+    pdf.link(x0 + L.x * k, L.y * k, L.w * k, L.h * k, { url: L.url });
+  }
   pdf.setProperties({
     title: S.name || 'Drum groove',
     subject: 'Drum sheet',
