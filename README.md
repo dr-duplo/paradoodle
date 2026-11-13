@@ -6,14 +6,17 @@ Paradoodle lets you doodle your grooves. Maybe one pops into your head on the bu
 
 **Try it now: [dr-duplo.github.io/paradoodle](https://dr-duplo.github.io/paradoodle/)**. It runs in any modern browser, is made for phones and can be installed like an app.
 
-![Paradoodle in the browser with the Kraut Break, a two-bar groove, on the step grid](docs/screenshot.png)
+<p align="center">
+  <a href="https://dr-duplo.github.io/paradoodle/"><img src="docs/demo.gif" width="600" alt="Paradoodle playing the Kraut Break, a two-bar groove, with the playhead moving across the step grid"></a>
+</p>
 
 ## Features
 
 - Quickly doodle your groove on a tap-to-draw drum grid
 - Save, import and export your grooves
-- Copy a groove as a link to share it, and paste a link anywhere in the app to open one
+- Share a groove as a link or a QR code, and paste a link anywhere in the app to open one
 - Practise along with a click, a visual flash or a spoken count
+- Export a drum sheet with staff notation as a PDF or PNG, with a QR code to open the groove again
 
 ## Why "Paradoodle"
 
@@ -23,11 +26,11 @@ A _paradiddle_ is one of the first rudiments every drummer learns: right, left, 
 
 **Sketch.** The grid has rows for crash, ride, hi-hat, snare, toms, bass drum and hi-hat foot. Tap a cell to cycle through its sounds (closed, open or ghosted hi-hat; hit, rim or ghost on the snare; high, mid or floor tom) and hold it to clear. Bars can have 2 to 7 beats in 8ths, triplets or 16ths, with as much swing as the groove needs. A groove holds up to 8 bars, and you can name, reorder, duplicate or solo each one.
 
-**Listen.** Playback uses a small drum kit synthesised in the browser. A metronome click, a flash on every beat or a spoken "1, 2, 3, 4" help you lock in, and the bar that's playing scrolls into view. Tap an instrument's name to mute it, or double-tap it to hear that instrument alone; double-tap again to bring everything back.
+**Listen.** Playback uses a small drum kit synthesised in the browser. Press Space to start and stop. A metronome click, a flash on every beat or a spoken "1, 2, 3, 4" help you lock in, and the bar that's playing scrolls into view. Tap an instrument's name to mute it, or double-tap it to hear that instrument alone; double-tap again to bring everything back.
 
 **Keep.** The save icon at the top keeps the groove in your library under **Grooves**; a dot on it means there are unsaved changes. Undo and redo sit next to it (⌘Z / Ctrl+Z, ⇧⌘Z / Ctrl+Y).
 
-**Share.** Every groove fits into a link: tap the share button at the top right to copy it, or press ⌘C / Ctrl+C with nothing selected. **Show QR code** in the same menu draws the link as a QR code, so someone next to you can scan it with their phone. The browser tab shows the groove's name; a preview of the link in a chat app shows Paradoodle itself, because the groove sits after the `#`, which chat apps never get to see. Your bandmate opens exactly what you wrote. Paste a link, or a whole chat message containing one, anywhere in the app to open it. The address in the browser follows along as you edit, so a bookmark always holds the current groove.
+**Share.** Every groove fits into a link: tap the share button at the top right to copy it, or press ⌘C / Ctrl+C with nothing selected. Your bandmate opens exactly what you wrote. **Show QR code** in the same menu draws the link as a QR code, so someone next to you can scan it with their phone. Paste a link, or a whole chat message containing one, anywhere in the app to open it. The address in the browser follows along as you edit, so a bookmark always holds the current groove, and the browser tab shows its name. A preview of the link in a chat app shows Paradoodle itself, though, because the groove sits after the `#`, which chat apps never get to see.
 
 **Print.** The share button also exports a drum sheet with staff notation, the grid, or both, as a PNG or an A4 PDF. A QR code of the groove sits at the top left, beside the title, so a printed sheet can be scanned to hear it again; in the PDF, it is also a link.
 
@@ -39,7 +42,7 @@ The theme button in the playback bar switches between dark, light and auto (foll
 - **Android:** open the menu and choose **Add to Home screen** or **Install app**.
 - **iPhone or iPad:** open the page in Safari, tap **Share**, then **Add to Home Screen**.
 
-The installed app opens in its own window and works offline. Sketching and playback always work; exporting works offline once you have exported a sheet with a connection, because that is when the notation and PDF libraries are downloaded.
+The installed app opens in its own window and works offline. Sketching and playback always work; exporting and QR codes work offline once you have exported a sheet with a connection, because that is when the notation, PDF and QR code libraries are downloaded.
 
 On iPhone and iPad, the installed app keeps its own storage, separate from Safari. To bring grooves over, send yourself a share link, or use **Export all** and **Import** in the Grooves panel.
 
@@ -84,7 +87,7 @@ There is no framework and no bundler during development. `index.html` holds the 
 | `js/examples.js`                 | Built-in example grooves                                                                         |
 | `js/library.js`                  | Saved grooves and the Grooves panel                                                              |
 | `js/loop-files.js`               | Exporting and importing grooves as JSON                                                          |
-| `js/share-links.js`              | Packing a groove into a link and opening links                                                   |
+| `js/share-links.js`              | Packing a groove into a link, opening links and drawing the QR code                              |
 | `js/tooltips.js`                 | Hover tips on buttons                                                                            |
 | `js/main.js`                     | Starts the app and registers the service worker                                                  |
 | `js/count-sounds.js`             | The spoken count as base64 WAV data                                                              |
