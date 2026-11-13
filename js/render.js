@@ -114,6 +114,7 @@ function paintCell(c, v, ins, label, b) {
 function renderAll() {
   $('name').value = S.name || '';
   fitName();
+  syncTitle();
   updateSaveDot();
   $('beats').value = S.beats;
   $('sub').value = S.sub;

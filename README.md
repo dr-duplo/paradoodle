@@ -27,7 +27,7 @@ A _paradiddle_ is one of the first rudiments every drummer learns: right, left, 
 
 **Keep.** The save icon at the top keeps the groove in your library under **Grooves**; a dot on it means there are unsaved changes. Undo and redo sit next to it (⌘Z / Ctrl+Z, ⇧⌘Z / Ctrl+Y).
 
-**Share.** Every groove fits into a link: tap the share button at the top right to copy it, or press ⌘C / Ctrl+C with nothing selected. Your bandmate opens exactly what you wrote. Paste a link, or a whole chat message containing one, anywhere in the app to open it. The address in the browser follows along as you edit, so a bookmark always holds the current groove.
+**Share.** Every groove fits into a link: tap the share button at the top right to copy it, or press ⌘C / Ctrl+C with nothing selected. **Show QR code** in the same menu draws the link as a QR code, so someone next to you can scan it with their phone. The browser tab shows the groove's name; a preview of the link in a chat app shows Paradoodle itself, because the groove sits after the `#`, which chat apps never get to see. Your bandmate opens exactly what you wrote. Paste a link, or a whole chat message containing one, anywhere in the app to open it. The address in the browser follows along as you edit, so a bookmark always holds the current groove.
 
 **Print.** The share button also exports a drum sheet with staff notation, the grid, or both, as a PNG or an A4 PDF.
 
@@ -47,7 +47,7 @@ On iPhone and iPad, the installed app keeps its own storage, separate from Safar
 
 There's no account and no server of ours. Your grooves are kept in your browser on your device, and nothing about them is sent anywhere. A share link carries the groove after the `#`, the part of an address browsers never send to a server, so even the site that hosts the app doesn't see it.
 
-The app does load its fonts from Google Fonts and, when you first export, the notation library (VexFlow) and the PDF library (jsPDF) from public CDNs. Both libraries are pinned to an exact version and checked against an integrity hash before they run.
+The app does load its fonts from Google Fonts and, when you first export or show a QR code, the notation library (VexFlow), the PDF library (jsPDF) or the QR code library (qrcode-generator) from public CDNs. All three are pinned to an exact version and checked against an integrity hash before they run. The QR code itself is made on your device.
 
 Browsers can clear stored data, so back up the grooves you care about with **Export all** in the Grooves panel. The file can be imported again on any device.
 
@@ -97,7 +97,7 @@ You need Node 18 or newer. `npm run check` runs formatting, lint and build in on
 
 - `npm run format` formats everything with Prettier, and `npm run format:check` only reports.
 - `npm run lint` runs ESLint.
-- `npm run build` writes `dist/`: a single minified `index.html` with the styles and scripts inlined and a Content Security Policy that lets the page run only its own script and the two pinned libraries, plus the service worker, the manifest and the icons. That's what the live app serves.
+- `npm run build` writes `dist/`: a single minified `index.html` with the styles and scripts inlined and a Content Security Policy that lets the page run only its own script and the three pinned libraries, plus the service worker, the manifest and the icons. That's what the live app serves.
 
 Every pull request runs the same checks plus `npm audit`. CodeQL scans the code for security problems, and Dependabot proposes dependency and workflow updates every week. Changes reach `main` only through pull requests, a pull request merges only when its **CI / check** passes, and every push to `main` deploys to GitHub Pages.
 
@@ -132,6 +132,7 @@ Links made before the toms arrived use format `3`. It is the same except that bo
 
 - [VexFlow](https://www.vexflow.com/) for staff notation (MIT)
 - [jsPDF](https://github.com/parallax/jsPDF) for PDF export (MIT)
+- [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) by Kazuhiko Arase for QR codes (MIT)
 - [Piper](https://github.com/OHF-Voice/piper1-gpl) with the `en_US-ljspeech-high` voice for the spoken count. The voice is trained on the public-domain [LJ Speech](https://keithito.com/LJ-Speech-Dataset/) dataset, and only the generated recordings ship with the app.
 - [Barlow Condensed](https://fonts.google.com/specimen/Barlow+Condensed), [Inter](https://fonts.google.com/specimen/Inter) and [JetBrains Mono](https://fonts.google.com/specimen/JetBrains+Mono) from Google Fonts (SIL Open Font License)
 

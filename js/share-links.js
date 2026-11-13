@@ -225,6 +225,79 @@ document.addEventListener('copy', (e) => {
   } catch {}
   showLinkCopied(S.name || 'Untitled groove');
 });
+// The QR code: the groove's link drawn as a QR code, big enough to scan from another phone.
+// Black on white with a four-module margin in both themes, as scanners expect. The logo in the
+// middle hides some modules, which the highest error correction (H, about 30 %) makes up for; a
+// groove too long for H gets a plain code with medium correction instead.
+// The logo is the same drawing as icons/icon.svg.
+const QR_LOGO =
+  '<rect width="512" height="512" rx="96" fill="#1a2029"/>' +
+  '<circle cx="256" cy="256" r="168" fill="#222a35" stroke="#e7ebf0" stroke-width="30"/>' +
+  '<g fill="#1a2029"><circle cx="411.2" cy="320.3" r="7"/><circle cx="320.3" cy="411.2" r="7"/>' +
+  '<circle cx="191.7" cy="411.2" r="7"/><circle cx="100.8" cy="320.3" r="7"/>' +
+  '<circle cx="100.8" cy="191.7" r="7"/><circle cx="191.7" cy="100.8" r="7"/>' +
+  '<circle cx="320.3" cy="100.8" r="7"/><circle cx="411.2" cy="191.7" r="7"/></g>' +
+  '<path d="M140 293.4C169 215.2 221.2 209.3 215.4 261.6C209.6 316.6 154.5 310.9 180.6 261.6' +
+  'C206.7 212.2 264.7 203.6 273.4 258.6C282.1 313.8 227 316.6 250.2 264.4' +
+  'C273.4 212.2 337.2 209.3 345.9 261.6C351.7 299.2 328.5 316.6 372 270.2" fill="none" ' +
+  'stroke="#e2a93f" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>';
+function qrMake(text, level) {
+  const qr = window.qrcode(0, level);
+  qr.addData(text, 'Byte');
+  qr.make();
+  return qr;
+}
+function qrSvg(text) {
+  let qr,
+    logo = true;
+  try {
+    qr = qrMake(text, 'H');
+  } catch {
+    qr = qrMake(text, 'M');
+    logo = false;
+  }
+  const n = qr.getModuleCount(),
+    pad = 4,
+    size = n + 2 * pad;
+  let d = '';
+  for (let y = 0; y < n; y++)
+    for (let x = 0; x < n; x++) if (qr.isDark(y, x)) d += `M${x + pad} ${y + pad}h1v1h-1z`;
+  let mark = '';
+  if (logo) {
+    // about a fifth of the width, on a white patch one module wider all round
+    const w = Math.round(n * 0.2) | 1,
+      at = pad + (n - w) / 2;
+    mark =
+      `<rect x="${at - 1}" y="${at - 1}" width="${w + 2}" height="${w + 2}" rx="1.2" fill="#fff"/>` +
+      `<svg x="${at}" y="${at}" width="${w}" height="${w}" viewBox="0 0 512 512" shape-rendering="auto">${QR_LOGO}</svg>`;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges" aria-hidden="true"><rect width="${size}" height="${size}" fill="#fff"/><path d="${d}" fill="#000"/>${mark}</svg>`;
+}
+$('shareQr').onclick = () => {
+  closeMenus();
+  const hash = loopHash(S),
+    url = SHARE_BASE + hash,
+    box = $('qrBox');
+  try {
+    history.replaceState(null, '', hash);
+  } catch {}
+  $('qrName').textContent = S.name || 'Untitled groove';
+  $('qrHint').textContent = WHO_CAN_OPEN;
+  box.textContent = 'Making the QR code…';
+  openOv('qrOv');
+  loadLib('qrcode').then(
+    () => {
+      try {
+        box.innerHTML = qrSvg(url);
+      } catch {
+        box.textContent = 'This groove is too long for a QR code. Copy the link instead.';
+      }
+    },
+    () => {
+      box.textContent = "The QR code couldn't be made without a connection. Copy the link instead.";
+    },
+  );
+};
 $('copyShare').onclick = () => {
   const inp = $('shareUrl');
   try {
